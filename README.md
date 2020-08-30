@@ -19,10 +19,8 @@ make -f .\Makefile.pc-win
 
 ## Wii U
 
-Install these libs from [wiiu-fling](https://gitlab.com/QuarkTheAwesome/wiiu-fling#installing):
-- `pacman -S wiiu-fling/wiiu-sdl2 wiiu-fling/wiiu-sdl2_gfx wiiu-fling/wiiu-sdl2_image wiiu-fling/wiiu-sdl2_ttf`
 And these from [dkp-libs](https://devkitpro.org/wiki/devkitPro_pacman):
-- `pacman -S devkitPPC wut-tools wut wiiu-portlibs dkp-libs/wiiu-sdl2_mixer`
+- `(dkp)pacman -S devkitPPC wut-tools wut wiiu-portlibs wiiu-sdl2-libs`
 
 Build via:
 `make -f Makefile.wiiu`
