@@ -18,7 +18,6 @@
 
 #include <SDL2/SDL_render.h>
 #include "GuiElement.h"
-#include "glm/glm.hpp"
 
 //!Display, manage, and manipulate images in the GUI
 class GuiImage : public GuiElement {
