@@ -28,6 +28,7 @@ add_executable(${PROJECT_NAME}
         src/gui/SDLController.h src/MainWindow.cpp src/MainWindow.h src/gui/SDLControllerJoystick.h src/gui/SDLControllerMouse.h
         src/gui/SDLControllerWiiUGamepad.h
         src/gui/SDLControllerWiiUProContoller.h
+        src/gui/GuiTexture.cpp src/gui/GuiTexture.h
         )
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)

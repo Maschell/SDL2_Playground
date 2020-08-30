@@ -18,9 +18,10 @@
 
 #include <SDL2/SDL_render.h>
 #include "GuiElement.h"
+#include "GuiTexture.h"
 
 //!Display, manage, and manipulate images in the GUI
-class GuiImage : public GuiElement {
+class GuiImage : public GuiTexture {
 public:
     //!\overload
     //!\param img Pointer to GuiImageData element
@@ -28,12 +29,4 @@ public:
 
     //!Destructor
     ~GuiImage() override;
-
-    //!Constantly called to draw the image
-    void draw(CVideo *pVideo) override;
-protected:
-    SDL_Surface *imgSurface = nullptr;
-    SDL_Texture *texture = nullptr;
-
-    void process() override;
 };

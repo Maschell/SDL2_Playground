@@ -18,70 +18,8 @@
 #include <iostream>
 #include "GuiImage.h"
 #include "../CVideo.h"
-#include "../logger.h"
 
-GuiImage::GuiImage(const std::string& path) {
-    imgSurface = IMG_Load( path.c_str() );
-
-    this->width = imgSurface->w;
-    this->height = imgSurface->h;
+GuiImage::GuiImage(const std::string& path) : GuiTexture(path){
 }
 
-/**
- * Destructor for the GuiImage class.
- */
-GuiImage::~GuiImage() {
-    if(imgSurface){
-        SDL_FreeSurface(imgSurface);
-        imgSurface = NULL;
-    }
-    if(texture){
-        SDL_DestroyTexture(texture);
-        texture = NULL;
-    }
-}
-
-void GuiImage::process(){
-    auto res = this->getAngle() + 1;
-    if(res > 360){
-        res  =0;
-    }
-
-    setAngle(res);
-
-}
-
-void GuiImage::draw(CVideo *pVideo) {
-    if (!this->isVisible()) {
-        return;
-    }
-
-    if(texture == NULL){
-        SDL_Surface * optimizedSurface = SDL_ConvertSurfaceFormat( imgSurface, pVideo->getPixelFormat(), 0 );
-        if(optimizedSurface != NULL){
-            SDL_FreeSurface(imgSurface);
-            imgSurface = optimizedSurface;
-            DEBUG_FUNCTION_LINE("Optimized surface");
-        }
-        texture = SDL_CreateTextureFromSurface(pVideo->getRenderer(), imgSurface);
-    }
-
-    float currScaleX = getScaleX();
-    float currScaleY = getScaleY();
-
-    SDL_Rect rect;
-    rect.x = getLeft();
-    rect.y = getTop();
-    rect.w =  currScaleX * getWidth();
-    rect.h = currScaleY * getHeight();
-
-
-    // copy the texture to the rendering context
-    if(getAngle() == 0){
-         SDL_RenderCopy(pVideo->getRenderer(), texture, NULL, &rect);
-    }else{
-        SDL_RenderCopyEx(pVideo->getRenderer(), texture, NULL, &rect, getAngle(), NULL, SDL_FLIP_NONE);
-    }
-
-
-}
+GuiImage::~GuiImage() = default;
