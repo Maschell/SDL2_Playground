@@ -28,7 +28,7 @@ INCLUDES	:=	source
 #-------------------------------------------------------------------------------
 # options for code generation
 #-------------------------------------------------------------------------------
-CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
++CFLAGS :=  -g -Wall -O2 -ffunction-sections `$(PREFIX)pkg-config --cflags SDL2_mixer SDL2_ttf SDL2_image` \
 			$(MACHDEP)
 
 CFLAGS	+=	$(INCLUDE) -D__WIIU__ -D__WUT__
@@ -38,7 +38,7 @@ CXXFLAGS	:= $(CFLAGS) -std=c++20
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:=   -lSDL2_mixer  -lSDL2 -lSDL2_image -ljpeg -lvorbisidec -logg -lmodplug -lmpg123 -lSDL2_ttf -lfreetype -lpng  -lz -lbz2 -lwut
+LIBS   :=   `$(PREFIX)pkg-config --libs SDL2_mixer SDL2_ttf SDL2_image`
 
 
 #-------------------------------------------------------------------------------
