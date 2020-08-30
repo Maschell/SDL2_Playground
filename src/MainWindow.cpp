@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "gui/SDL_FontCache.h"
 
 MainWindow::~MainWindow() {
     delete label;;
@@ -30,9 +31,10 @@ MainWindow::MainWindow(int32_t w, int32_t h) : GuiFrame(w, h) {
 
     TTF_Init();
     TTF_Font *font;
-    font = TTF_OpenFont(font_path, 35);
 
-    label = new GuiText("This is a test AVAVAVVAVA", 25, {255, 255, 0, 255}, font);
+    font = TTF_OpenFont(font_path, 28);
+
+    label = new GuiText("This is a test.This is a test. This is a test.This is a test.This is a test.This is a test.", 25, {255, 255, 0, 255}, font);
 
     bgMusic = new GuiSound(bgMusic_path);
     bgMusic->SetLoop(true);
@@ -69,6 +71,7 @@ MainWindow::MainWindow(int32_t w, int32_t h) : GuiFrame(w, h) {
     button->setEffectGrow();
     label->setAlignment(ALIGN_CENTERED);
     button->setLabel(label);
+    label->setMaxWidth(button->getWidth());
     button->setSoundClick(sound);
 
     button->clicked.connect(this, &MainWindow::test);

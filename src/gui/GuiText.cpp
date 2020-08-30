@@ -19,6 +19,7 @@
 #include "GuiText.h"
 #include "../CVideo.h"
 #include "../logger.h"
+#include "SDL_FontCache.h"
 
 
 /**
@@ -26,65 +27,52 @@
  */
 
 GuiText::GuiText(const std::string& text, int32_t s, SDL_Color c, TTF_Font* gFont) {
-    //Render text surface
-    textSurface = TTF_RenderText_Solid( gFont, text.c_str(), c );
-    if( textSurface == NULL )    {
-        DEBUG_FUNCTION_LINE( "Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError() );
-    }
-
+   this->text = text;
+   this->size = s;
+   this->color = c;
+   this->ttf_font = gFont;
+   this->invalid = true;
+   this->updateText = true;
+   this->maxWidth = 200;
 }
 
 GuiText::~GuiText(){
-    if(textSurface){
-        SDL_FreeSurface( textSurface );
-        textSurface = nullptr;
-
-    }
-
-    if(textTexture){
-        SDL_DestroyTexture( textTexture );
-        textTexture = nullptr;
+    if(fc_font){
+        FC_FreeFont(fc_font);
+        fc_font = nullptr;
     }
 }
 
-/**
- * Draw the text on screen
- */
 void GuiText::draw(CVideo *pVideo) {
     if (!this->isVisible()) {
         return;
     }
-
-    if(textTexture == NULL){
-    //Create texture from surface pixels
-    textTexture = SDL_CreateTextureFromSurface( pVideo->getRenderer(), textSurface );
-    if( textTexture == NULL ) {
-        DEBUG_FUNCTION_LINE( "Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError() );
-    }else{
-        width = textSurface->w;
-        height = textSurface->h;
-    }
-
-    if(textSurface){
-        SDL_FreeSurface( textSurface );
-        textSurface = nullptr;
+    if(invalid){
+        if(fc_font){
+            FC_FreeFont(fc_font);
+            fc_font = nullptr;
         }
+        fc_font = FC_CreateFont();
+        invalid = !FC_LoadFontFromTTF(fc_font, pVideo->getRenderer(), this->ttf_font, color);
+        DEBUG_FUNCTION_LINE("FC_CACHE init done");
     }
 
-    if(!textTexture){
-        return;
-    }
+    FC_DrawColumnScale(fc_font, pVideo->getRenderer(), getLeft(), getTop(), maxWidth * getScaleX(), {getScaleX(), getScaleY()}, text.c_str());
+}
 
-    SDL_Rect rect;
-    rect.x = getLeft();
-    rect.y = getTop();
-    rect.w =  getScaleX() * getWidth();
-    rect.h = getScaleY() * getHeight();
+void GuiText::process() {
+    GuiElement::process();
 
-    // copy the texture to the rendering context
-    if(getAngle() == 0){
-        SDL_RenderCopy(pVideo->getRenderer(), textTexture, NULL, &rect);
-    }else{
-        SDL_RenderCopyEx(pVideo->getRenderer(), textTexture, NULL, &rect, getAngle(), NULL, SDL_FLIP_NONE);
+    if(updateText && fc_font){
+        auto height = FC_GetColumnHeight(fc_font, maxWidth, text.c_str());
+        auto width = FC_GetWidth(fc_font, text.c_str());
+        width = width > maxWidth ? maxWidth : width;
+        DEBUG_FUNCTION_LINE("width %d height %d", width, height);
+        this->setSize(width, height);
+        updateText = false;
     }
+}
+
+void GuiText::setMaxWidth(float width) {
+    this->maxWidth = width;
 }

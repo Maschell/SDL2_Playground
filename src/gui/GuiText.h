@@ -17,6 +17,7 @@
 #pragma once
 
 #include "GuiElement.h"
+#include "SDL_FontCache.h"
 #include <mutex>
 #include <SDL2/SDL_ttf.h>
 
@@ -33,7 +34,18 @@ public:
 
     void draw(CVideo *pVideo) override;
 
+    void process() override;
+
+    void setMaxWidth(float width);
+
 protected:
-    SDL_Surface *textSurface = nullptr;
-    SDL_Texture *textTexture = nullptr;
+    std::string text;
+    int32_t size;
+    SDL_Color color;
+    TTF_Font *ttf_font = nullptr;
+    FC_Font *fc_font = nullptr;
+    bool invalid = true;
+    bool updateText = true;
+
+    uint16_t maxWidth = 0xFFFF;
 };
