@@ -14,7 +14,7 @@ public:
     ~MainWindow();
 
     MainWindow(int32_t w, int32_t h);
-
+    void process() override;
 private:
     GuiText *label = nullptr;
     GuiTrigger *touchTrigger = nullptr;

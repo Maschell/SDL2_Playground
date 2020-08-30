@@ -18,6 +18,7 @@
 
 #include "GuiElement.h"
 #include "SDL_FontCache.h"
+#include "GuiTexture.h"
 #include <mutex>
 #include <SDL2/SDL_ttf.h>
 
@@ -39,6 +40,7 @@ public:
     void setMaxWidth(float width);
 
 protected:
+    GuiTexture* texture = nullptr;
     std::string text;
     int32_t size;
     SDL_Color color;

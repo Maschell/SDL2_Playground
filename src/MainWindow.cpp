@@ -76,3 +76,14 @@ MainWindow::MainWindow(int32_t w, int32_t h) : GuiFrame(w, h) {
 
     button->clicked.connect(this, &MainWindow::test);
 }
+
+void MainWindow::process() {
+    GuiFrame::process();
+
+    // Rotate the button for fun.
+    auto res = button->getAngle() + 1;
+    if(res > 360){
+        res = 0;
+    }
+    button->setAngle(res);
+}
