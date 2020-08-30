@@ -5,3 +5,4 @@ cmake/
 *.elf
 *.rpx
 *.exe
+build-pc-win/

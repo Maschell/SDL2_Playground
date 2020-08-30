@@ -17,6 +17,13 @@ pacman -S git mingw-w64-x86_64-toolchain mingw64/mingw-w64-x86_64-SDL2 mingw64/m
 make -f .\Makefile.pc-win
 ```
 
+## Windows with docker
+
+```
+docker build . -f .\Dockerfile.pc-win  -t sdl2_playground-builder-pc-win
+docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc-win make -f .\Makefile.pc-win -j16
+```
+
 ## Wii U
 
 And these from [dkp-libs](https://devkitpro.org/wiki/devkitPro_pacman):

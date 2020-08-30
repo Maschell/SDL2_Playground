@@ -2,13 +2,21 @@
 .SUFFIXES:
 #-------------------------------------------------------------------------------
 
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+ifeq ($(strip $(MINGW64_PREFIX)),)
+    $(error "Please set MINGW64_PREFIX in your environment. export MINGW64_PREFIX=<path to>/mingw64/bin/")
 endif
 
-CXX	:= $(DEVKITPRO)/msys2/mingw64/bin/g++
-C	:= $(DEVKITPRO)/msys2/mingw64/bin/gcc
-PREFIX	:= $(DEVKITPRO)/msys2/mingw64/bin/
+
+CXX	:= $(MINGW64_PREFIX)g++
+C	:= $(MINGW64_PREFIX)gcc
+PREFIX	:= $(MINGW64_PREFIX)
+
+ifeq ($(strip $(CONFIG_PREFIX)),)
+ PKG-CONFIG := $(PREFIX)pkg-config
+else 
+ PKG-CONFIG := $(CONFIG_PREFIX)pkg-config
+endif
+
 
 #-------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -18,34 +26,42 @@ PREFIX	:= $(DEVKITPRO)/msys2/mingw64/bin/
 # INCLUDES is a list of directories containing header files
 #-------------------------------------------------------------------------------
 TARGET		:=	SDL2_Playground
-BUILD		:=	build
+BUILD		:=	build-pc-win
 SOURCES		:=	src \
                 src/gui
 DATA		:=	data
 INCLUDES	:=	source
 
-
 #-------------------------------------------------------------------------------
 # options for code generation
 #-------------------------------------------------------------------------------
-+CFLAGS :=  -g -Wall -O2 -ffunction-sections `$(PREFIX)pkg-config --cflags SDL2_mixer SDL2_ttf SDL2_image` \
+CFLAGS :=  -g -Wall -O2 -ffunction-sections `$(PKG-CONFIG) --cflags SDL2_mixer SDL2_ttf SDL2_image` \
 			$(MACHDEP)
 
 CFLAGS	+=	$(INCLUDE)
 
-CXXFLAGS	:= $(CFLAGS) -std=c++20
+
+ifeq ($(strip $(EXTRA_CFLAGS)),)
+else 
+ CFLAGS	+= $(EXTRA_CFLAGS)
+endif
+
+CXXFLAGS	:= $(CFLAGS) -std=c++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-g $(ARCH)
 
-LIBS   :=   `$(PREFIX)pkg-config --libs SDL2_mixer SDL2_ttf SDL2_image`
-
+LIBS   :=   `$(PKG-CONFIG) --libs SDL2_mixer SDL2_ttf SDL2_image`
+    ifeq ($(strip $(EXTRA_LDFLAGS)),)
+else 
+    LDFLAGS	+= $(EXTRA_LDFLAGS)
+endif
 
 #-------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level
 # containing include and lib
 #-------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS)
+LIBDIRS	:= 
 
 #-------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -104,7 +120,7 @@ $(BUILD):
 #-------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).rpx $(TARGET).elf
+	@rm -fr $(BUILD) $(TARGET).exe
 
 #-------------------------------------------------------------------------------
 else
@@ -126,12 +142,8 @@ $(OUTPUT).exe:
 	@$(CXX) $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@ $(ERROR_FILTER)
 
 %.o: %.cpp
-	@echo "$(notdir $<)"
-	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS) -c $< -o $@ $(ERROR_FILTER)
-
-clean:
-	rm -f $(OBJS) $(OBJ_NAME) $(MINIZIP_O)
-
+	@echo "$(notdir $<)"	
+	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS)  -c $< -o $@ $(ERROR_FILTER)
 
 -include $(DEPENDS)
 
