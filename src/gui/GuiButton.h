@@ -100,6 +100,8 @@ public:
     //!\param t Pointer to a GuiTrigger, containing the current input data from PAD/WPAD
     void update(GuiController *c) override;
 
+    void process() override;
+
     sigslot::signal2<GuiButton *, const GuiController *> selected;
     sigslot::signal2<GuiButton *, const GuiController *> deSelected;
     sigslot::signal2<GuiButton *, const GuiController *> pointedOn;

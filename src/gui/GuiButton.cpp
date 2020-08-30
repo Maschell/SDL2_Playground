@@ -241,7 +241,7 @@ void GuiButton::update(GuiController *c) {
             } else if ((isStateSet(STATE_CLICKED, c->chanIdx) || isStateSet(STATE_CLICKED_TOUCH, c->chanIdx)) && (clickedTrigger == trigger[i]) && !isStateSet(STATE_HELD, c->chanIdx) && !trigger[i]->held(c) &&
                        ((isClicked == GuiTrigger::CLICKED_NONE) || trigger[i]->released(c))) {
                 if ((isStateSet(STATE_CLICKED_TOUCH, c->chanIdx) && this->isInside(c->data.x, c->data.y)) || (isStateSet(STATE_CLICKED, c->chanIdx))) {
-                    clickedTrigger = NULL;
+                    clickedTrigger = nullptr;
                     clearState(STATE_CLICKED, c->chanIdx);
                     released(this, c, trigger[i]);
                 }
@@ -263,13 +263,34 @@ void GuiButton::update(GuiController *c) {
             } else if (isStateSet(STATE_HELD, c->chanIdx) && (heldTrigger == trigger[i]) && (!isHeld || trigger[i]->released(c))) {
                 //! click is removed at this point and converted to held
                 if (clickedTrigger == trigger[i]) {
-                    clickedTrigger = NULL;
+                    clickedTrigger = nullptr;
                     clearState(STATE_CLICKED, c->chanIdx);
                 }
-                heldTrigger = NULL;
+                heldTrigger = nullptr;
                 clearState(STATE_HELD, c->chanIdx);
                 released(this, c, trigger[i]);
             }
         }
+    }
+}
+
+void GuiButton::process() {
+    GuiElement::process();
+
+    if(image) { image->process(); }
+    if(imageOver) { imageOver->process(); }
+    if(imageHold) { imageHold->process(); }
+    if(imageClick) { imageClick->process(); }
+    if(icon) { icon->process(); }
+    if(iconOver) { iconOver->process(); }
+    if(soundOver) { soundOver->process(); }
+    if(soundHold) { soundHold->process(); }
+    if(soundClick) { soundClick->process(); }
+
+    for(int i = 0;i<4;i++){
+        if(label[i]) { label[i]->process(); }
+        if(labelOver[i]) { labelOver[i]->process(); }
+        if(labelHold[i]) { labelHold[i]->process(); }
+        if(labelClick[i]) { labelClick[i]->process(); }
     }
 }
