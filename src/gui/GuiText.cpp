@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include <cstdarg>
-#include <SDl2/SDL_surface.h>
+#include <SDL2/SDL_surface.h>
 #include "GuiText.h"
 #include "../CVideo.h"
 #include "../logger.h"

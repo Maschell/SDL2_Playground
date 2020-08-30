@@ -10,11 +10,11 @@
 
 class SDLController : public GuiController {
 public:
-    SDLController(int32_t channel) : GuiController(channel) {
+    explicit SDLController(int32_t channel) : GuiController(channel) {
 
     }
 
-    virtual bool update(SDL_Event *e) = 0;
+    virtual bool update(SDL_Event *e, int32_t screenWidth, int32_t screenHeight) = 0;
 
 
     virtual void before() {

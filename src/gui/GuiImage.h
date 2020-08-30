@@ -25,18 +25,16 @@ class GuiImage : public GuiElement {
 public:
     //!\overload
     //!\param img Pointer to GuiImageData element
-    GuiImage(const std::string &path);
+    explicit GuiImage(const std::string &path);
 
     //!Destructor
-    virtual ~GuiImage();
+    ~GuiImage() override;
 
     //!Constantly called to draw the image
-    void draw(CVideo *pVideo);
-
-
+    void draw(CVideo *pVideo) override;
 protected:
     SDL_Surface *imgSurface = nullptr;
     SDL_Texture *texture = nullptr;
 
-    virtual void process();
+    void process() override;
 };

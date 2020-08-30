@@ -18,3 +18,13 @@ mkdir build && cd build
 C:\devkitPro\msys2\mingw64\bin\cmake.exe -DSDL2_PATH=C:/devkitPro/msys2/mingw64 -Wno-dev -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=C:/devkitPro/msys2/mingw64/bin/g++.exe DCMAKE_C_COMPILER=C:/devkitPro/msys2/mingw64/bin/gcc.exe ../
 make
 ```
+
+## Wii U
+
+Install these libs from [wiiu-fling](https://gitlab.com/QuarkTheAwesome/wiiu-fling#installing):
+- `pacman -S wiiu-fling/wiiu-sdl2 wiiu-fling/wiiu-sdl2_gfx wiiu-fling/wiiu-sdl2_image wiiu-fling/wiiu-sdl2_ttf`
+And these from [dkp-libs](https://devkitpro.org/wiki/devkitPro_pacman):
+- `pacman -S devkitPPC wut-tools wut wiiu-portlibs dkp-libs/wiiu-sdl2_mixer`
+
+Build via:
+`make -f Makefile.wiiu`

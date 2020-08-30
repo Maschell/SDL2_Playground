@@ -68,49 +68,34 @@ public:
 
     //!Sets the visibility of the window
     //!\param v visibility (true = visible)
-    void setVisible(bool v);
+    void setVisible(bool v) override;
 
     //!Resets the window's state to STATE_DEFAULT
-    void resetState();
+    void resetState() override;
 
     //!Sets the window's state
     //!\param s State
-    void setState(int32_t s, int32_t c = -1);
+    void setState(int32_t s, int32_t c = -1) override;
 
-    void clearState(int32_t s, int32_t c = -1);
+    void clearState(int32_t s, int32_t c = -1) override;
 
     //!Gets the index of the GuiElement inside the window that is currently selected
     //!\return index of selected GuiElement
-    int32_t getSelected();
-
-    //!Dim the Window's background
-    void dimBackground(bool d);
+    int32_t getSelected() override;
 
     //!Draws all the elements in this GuiFrame
-    void draw(CVideo *v);
+    void draw(CVideo *v) override;
 
     //!Updates the window and all elements contains within
     //!Allows the GuiFrame and all elements to respond to the input data specified
     //!\param t Pointer to a GuiTrigger, containing the current input data from PAD/WPAD
-    void update(GuiController *t);
-
-    //!virtual Close Window - this will put the object on the delete queue in MainWindow
-    virtual void close();
-
-    //!virtual show window function
-    virtual void show() {}
-
-    //!virtual hide window function
-    virtual void hide() {}
-
-    //!virtual enter main loop function (blocking)
-    virtual void exec() {}
+    void update(GuiController *t) override;
 
     //!virtual updateEffects which is called by the main loop
-    virtual void updateEffects();
+    void updateEffects() override;
 
     //!virtual process which is called by the main loop
-    virtual void process();
+    void process() override;
 
     //! Signals
     //! On Closing

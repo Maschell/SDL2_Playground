@@ -91,14 +91,14 @@ public:
     void setTrigger(GuiTrigger *t, int32_t idx = -1);
 
     //!
-    void resetState(void);
+    void resetState(void) override;
 
     //!Constantly called to draw the GuiButton
-    void draw(CVideo *video);
+    void draw(CVideo *video) override;
 
     //!Constantly called to allow the GuiButton to respond to updated input data
     //!\param t Pointer to a GuiTrigger, containing the current input data from PAD/WPAD
-    void update(GuiController *c);
+    void update(GuiController *c) override;
 
     sigslot::signal2<GuiButton *, const GuiController *> selected;
     sigslot::signal2<GuiButton *, const GuiController *> deSelected;

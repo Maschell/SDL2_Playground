@@ -42,11 +42,11 @@ if(axis == targetAxis){ \
 
 class SDLControllerXboxOne : public SDLController {
 public:
-    SDLControllerXboxOne(int32_t channel) : SDLController(channel) {
+    explicit SDLControllerXboxOne(int32_t channel) : SDLController(channel) {
 
     }
 
-    virtual bool update(SDL_Event *e) override {
+    bool update(SDL_Event *e, int32_t screenWidth, int32_t screenHeight) override {
         if (e->type == SDL_JOYBUTTONDOWN) {
             data.buttons_h |= xbox_button_map[e->jbutton.button];
         } else if (e->type == SDL_JOYBUTTONUP) {

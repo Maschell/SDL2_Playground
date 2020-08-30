@@ -30,9 +30,9 @@ public:
     //!\param s Font size
     //!\param c Font color
     GuiText(const std::string &t, int32_t s, SDL_Color c, TTF_Font *gFont);
-    virtual ~GuiText();
+    ~GuiText() override;
 
-    virtual void draw(CVideo *pVideo);
+    void draw(CVideo *pVideo) override;
 
 protected:
     SDL_Surface *textSurface = nullptr;

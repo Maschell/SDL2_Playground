@@ -25,10 +25,10 @@ public:
     //!Constructor
     //!\param sound Pointer to the sound data
     //!\param filesize Length of sound data
-    GuiSound(const char *filepath);
+    explicit GuiSound(const char *filepath);
 
     //!Destructor
-    virtual ~GuiSound();
+    ~GuiSound() override;
 
     //!Load a file and replace the old one
     bool Load(const char *filepath);

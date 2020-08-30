@@ -3,11 +3,11 @@
 
 class SDLControllerMouse: public SDLController {
 public:
-    SDLControllerMouse(int32_t channel) : SDLController(channel) {
+    explicit SDLControllerMouse(int32_t channel) : SDLController(channel) {
 
     }
 
-    virtual bool update(SDL_Event *e) override {
+    virtual bool update(SDL_Event *e, int32_t screenWidth, int32_t screenHeight) override {
         if (e->type == SDL_MOUSEMOTION) {
             data.y = e->motion.y;
             data.x = e->motion.x;

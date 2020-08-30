@@ -21,14 +21,14 @@ static GuiTrigger::eButtons vpad_button_map[] = {
 
 class SDLControllerWiiUGamepad : public SDLController {
 public:
-    SDLControllerWiiUGamepad(int32_t channel) : SDLController(channel) {
+    explicit SDLControllerWiiUGamepad(int32_t channel) : SDLController(channel) {
 
     }
 
-    virtual bool update(SDL_Event *e) override {
+    bool update(SDL_Event *e, int32_t screenWidth, int32_t screenHeight) override {
         if (e->type == SDL_FINGERMOTION) {
-            data.y = e->tfinger.y * 720;
-            data.x = e->tfinger.x * 1280;;
+            data.y = e->tfinger.y * screenHeight;
+            data.x = e->tfinger.x * screenWidth;;
             data.validPointer = true;
         } else if (e->type == SDL_FINGERUP) {
             data.validPointer = false;
@@ -36,8 +36,7 @@ public:
         } else if (e->type == SDL_FINGERDOWN) {
             data.validPointer = true;
             data.buttons_h |= GuiTrigger::TOUCHED;
-        }
-        if (e->type == SDL_JOYBUTTONDOWN) {
+        } else if (e->type == SDL_JOYBUTTONDOWN) {
             data.buttons_h |= vpad_button_map[e->jbutton.button];
         } else if (e->type == SDL_JOYBUTTONUP) {
             data.buttons_h &= ~vpad_button_map[e->jbutton.button];

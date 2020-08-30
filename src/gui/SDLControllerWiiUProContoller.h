@@ -4,7 +4,7 @@
 
 class SDLControllerWiiUProContoller : public SDLControllerWiiUGamepad {
 public:
-    SDLControllerWiiUProContoller(int32_t channel) : SDLControllerWiiUGamepad(channel){
+    explicit SDLControllerWiiUProContoller(int32_t channel) : SDLControllerWiiUGamepad(channel){
 
     }
 };

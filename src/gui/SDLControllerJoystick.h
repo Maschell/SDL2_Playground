@@ -6,7 +6,7 @@ public:
 
     }
 
-    virtual bool update(SDL_Event *e) override {
+    bool update(SDL_Event *e, int32_t screenWidth, int32_t screenHeight) override {
         if (e->type == SDL_JOYBUTTONDOWN) {
             data.buttons_h |= (1 << e->jbutton.button);
         } else if (e->type == SDL_JOYBUTTONUP) {

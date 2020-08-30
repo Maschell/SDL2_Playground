@@ -91,14 +91,6 @@ void GuiFrame::removeAll() {
     mutex.unlock();
 }
 
-void GuiFrame::close() {
-    //Application::instance()->pushForDelete(this);
-}
-
-void GuiFrame::dimBackground(bool d) {
-    dim = d;
-}
-
 GuiElement *GuiFrame::getGuiElementAt(uint32_t index) const {
     if (index >= elements.size()) {
         return NULL;

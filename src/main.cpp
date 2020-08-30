@@ -13,7 +13,7 @@
 #include "gui/SDLControllerXboxOne.h"
 #include "gui/SDLControllerWiiUProContoller.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <fcntl.h>
 
 #include <map>
@@ -25,7 +25,7 @@
 #ifdef __WIIU__
 #include <whb/log.h>
 #include <whb/log_cafe.h>
-#include <whb/log_udp.h>
+#include <whb/log_udp.h>  
 #include <proc_ui/procui.h>
 bool CheckRunning(){
     switch(ProcUIProcessMessages(true))
@@ -51,16 +51,14 @@ bool CheckRunning(){
 }
 #endif
 
-void proccessEvents();
-
-bool addJoystick(int deviceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& map);
+bool addJoystick(int deviceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel);
 
 GuiTrigger::eChannels increaseChannel(GuiTrigger::eChannels channel);
 
-void removeJoystick(int32_t which, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel);
+void removeJoystick(int32_t instanceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel);
 
 int main(int argc, char *args[]) {
-    CVideo *video = new CVideo();
+    auto *video = new CVideo();
 
 #if defined _WIN32
     // Create the Console
@@ -110,19 +108,21 @@ int main(int argc, char *args[]) {
         bool quit = false;
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
+            int32_t channel = -1;
             SDL_JoystickID jId = -1;
             if(e.type == SDL_JOYDEVICEADDED) {
                 addJoystick(e.jdevice.which, controllerList, joystickToChannel);
+                continue;
             }else if(e.type ==  SDL_JOYDEVICEREMOVED) {
                 auto j = SDL_JoystickFromInstanceID(e.jdevice.which);
                 if (j) {
                     removeJoystick(e.jdevice.which, controllerList, joystickToChannel);
                     SDL_JoystickClose(j);
+                    continue;
                 }
-            }else if (e.type == SDL_FINGERDOWN || e.type == SDL_FINGERUP || e.type == SDL_FINGERMOTION){
-                controllerList[GuiTrigger::CHANNEL_1]->update(&e);
-            } else if (e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEMOTION){
-                controllerList[GuiTrigger::CHANNEL_1]->update(&e);
+            }else if (e.type == SDL_FINGERDOWN || e.type == SDL_FINGERUP || e.type == SDL_FINGERMOTION ||
+                e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEMOTION){
+                channel = GuiTrigger::CHANNEL_1;
             } else if (e.type == SDL_JOYAXISMOTION) {
                 jId = e.jaxis.which;
             } else if (e.type == SDL_JOYHATMOTION) {
@@ -136,8 +136,11 @@ int main(int argc, char *args[]) {
 
             if(jId != -1){
                 if(joystickToChannel.find(jId) != joystickToChannel.end()){
-                    controllerList[joystickToChannel[jId]]->update(&e);
+                    channel = joystickToChannel[jId];
                 }
+            }
+            if(channel != -1){
+                controllerList[static_cast<GuiTrigger::eChannels>(channel)]->update(&e, video->getWidth(), video->getHeight());
             }
         }
         if(quit){
@@ -226,12 +229,8 @@ GuiTrigger::eChannels increaseChannel(GuiTrigger::eChannels channel) {
             return GuiTrigger::CHANNEL_4;
         case GuiTrigger::CHANNEL_4:
             return GuiTrigger::CHANNEL_5;
-    }
-    return GuiTrigger::CHANNEL_ALL;
-}
-
-void proccessEvents() {
-
-    int res = 0;
-
+        case GuiTrigger::CHANNEL_5:
+        case GuiTrigger::CHANNEL_ALL:
+            return GuiTrigger::CHANNEL_ALL;
+    }    
 }
