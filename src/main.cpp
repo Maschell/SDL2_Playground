@@ -232,5 +232,6 @@ GuiTrigger::eChannels increaseChannel(GuiTrigger::eChannels channel) {
         case GuiTrigger::CHANNEL_5:
         case GuiTrigger::CHANNEL_ALL:
             return GuiTrigger::CHANNEL_ALL;
-    }    
+    }
+    return GuiTrigger::CHANNEL_ALL;
 }
