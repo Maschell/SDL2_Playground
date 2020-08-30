@@ -38,7 +38,7 @@ CXXFLAGS	:= $(CFLAGS) -std=c++20
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:=   -lSDL2_mixer -lmodplug -lstdc++ -lm -lmpg123 -lm -lvorbisfile -lvorbis -lm -logg -lSDL2_ttf -lfreetype -lbz2 -lSDL2_image -lpng16 -lz -lm -lz -ljpeg -lSDL2 /opt/devkitpro/wut/lib/libwut.a -lm -Wl,--no-undefined -lSDL2 /opt/devkitpro/wut/lib/libwut.a
+LIBS	:=   -lSDL2_mixer  -lSDL2 -lSDL2_image -ljpeg -lvorbisidec -logg -lmodplug -lmpg123 -lSDL2_ttf -lfreetype -lpng  -lz -lbz2 -lwut
 
 
 #-------------------------------------------------------------------------------
