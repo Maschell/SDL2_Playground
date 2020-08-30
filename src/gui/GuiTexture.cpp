@@ -78,26 +78,16 @@ void GuiTexture::draw(CVideo *pVideo) {
     rect.w = currScaleX * getWidth();
     rect.h = currScaleY * getHeight();
 
-    // copy the texture to the rendering context
-    SDL_BlendMode mode;
-    SDL_GetRenderDrawBlendMode(pVideo->getRenderer(), &mode);
-
-    // adjust blend mode
-    if(blendMode != mode){
-        SDL_SetRenderDrawBlendMode(pVideo->getRenderer(), blendMode);
-    }
     if (getAngle() == 0) {
-        SDL_RenderCopy(pVideo->getRenderer(), texture, NULL, &rect);
+        SDL_RenderCopy(pVideo->getRenderer(), texture, nullptr, &rect);
     } else {
-        SDL_RenderCopyEx(pVideo->getRenderer(), texture, NULL, &rect, getAngle(), NULL, SDL_FLIP_NONE);
-    }
-    // Restore blend mode
-    if(blendMode != mode) {
-        SDL_SetRenderDrawBlendMode(pVideo->getRenderer(), mode);
+        SDL_RenderCopyEx(pVideo->getRenderer(), texture, nullptr, &rect, getAngle(), nullptr, SDL_FLIP_NONE);
     }
 }
 
-void GuiTexture::setBlend(SDL_BlendMode blendmode) {
-    this->blendMode = blendMode;
+int GuiTexture::setBlendMode(SDL_BlendMode) {
+    if(texture){
+        return SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+    }
+    return SDL_BLENDMODE_INVALID;
 }
-

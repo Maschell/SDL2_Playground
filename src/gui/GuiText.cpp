@@ -65,11 +65,12 @@ void GuiText::draw(CVideo *pVideo) {
         if(temp){
             texture = new GuiTexture(temp);
             texture->setParent(this);
-            texture->setBlend(SDL_BLENDMODE_BLEND);
+            texture->setBlendMode(SDL_BLENDMODE_BLEND);
 
             // Draw the text onto it
             SDL_SetRenderTarget(pVideo->getRenderer(), temp);
-            SDL_SetTextureBlendMode(temp, SDL_BLENDMODE_BLEND);
+            // make sure the texture is clean.
+            SDL_RenderClear(pVideo->getRenderer());
             FC_DrawColumn(fc_font, pVideo->getRenderer(), 0, 0, maxWidth, text.c_str());
             SDL_SetRenderTarget(pVideo->getRenderer(), NULL);
 

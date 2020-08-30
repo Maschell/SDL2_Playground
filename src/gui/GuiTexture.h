@@ -14,10 +14,9 @@ public:
     //!Constantly called to draw the image
     void draw(CVideo *pVideo) override;
 
-    void setBlend(SDL_BlendMode blendMode);
+    int setBlendMode(SDL_BlendMode blendMode);
 
 protected:
     SDL_Surface *imgSurface = nullptr;
     SDL_Texture *texture = nullptr;
-    SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
 };
