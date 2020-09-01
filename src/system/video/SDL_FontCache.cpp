@@ -455,10 +455,6 @@ struct FC_Font
 
 std::recursive_mutex mutex;
 
-SDL_Texture* FC_CreateTexture(FC_Font *pFont, uint32_t pixelFormat, float width, float height) {
-    return SDL_CreateTexture(pFont->renderer, pixelFormat, SDL_TEXTUREACCESS_TARGET, width, height);
-}
-
 // Private
 static FC_GlyphData* FC_PackGlyphData(FC_Font* font, Uint32 codepoint, Uint16 width, Uint16 maxWidth, Uint16 maxHeight);
 

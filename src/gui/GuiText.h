@@ -43,11 +43,11 @@ protected:
     std::string text;
     SDL_Color color;
     FC_Font *fc_font = nullptr;
-    bool updateText = true;
+    bool doUpdateTexture = true;
 
     uint16_t maxWidth = 0xFFFF;
 
     void updateSize();
 
-    void updateTexture();
+    void updateTexture(Renderer *renderer);
 };

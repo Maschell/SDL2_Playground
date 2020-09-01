@@ -121,8 +121,6 @@ FC_Effect FC_MakeEffect(FC_AlignEnum alignment, FC_Scale scale, SDL_Color color)
 
 FC_GlyphData FC_MakeGlyphData(int cache_level, Sint16 x, Sint16 y, Uint16 w, Uint16 h);
 
-SDL_Texture* FC_CreateTexture(FC_Font *pFont, uint32_t pixelFormat, float width, float height);
-
 // Font object
 
 FC_Font* FC_CreateFont(void);

@@ -26,10 +26,8 @@ GuiText::GuiText(const std::string& text, SDL_Color c, FC_Font* gFont) {
    this->text = text;
    this->color = c;
    this->fc_font = gFont;
-   this->updateText = false;
-
    updateSize();
-   updateTexture();
+   this->doUpdateTexture = true;
 }
 
 GuiText::~GuiText(){
@@ -45,6 +43,8 @@ void GuiText::draw(Renderer *renderer) {
         return;
     }
 
+    updateTexture(renderer);
+
     if(texture){
         texture->draw(renderer);
     }
@@ -52,18 +52,13 @@ void GuiText::draw(Renderer *renderer) {
 
 void GuiText::process() {
     GuiElement::process();
-
-    if(updateText && fc_font){
-        updateTexture();
-        updateText = false;
-    }
 }
 
 void GuiText::setMaxWidth(float width) {
     this->maxWidth = width;
 
     // Rebuild the texture cache.
-    updateText = true;
+    doUpdateTexture = true;
 }
 
 void GuiText::updateSize() {
@@ -73,18 +68,21 @@ void GuiText::updateSize() {
     this->setSize(width, height);
 }
 
-void GuiText::updateTexture() {
-    updateSize();
-    SDL_Texture* temp = FC_CreateTexture(fc_font,   SDL_PIXELFORMAT_RGBA8888, width, height);
+void GuiText::updateTexture(Renderer *renderer) {
+    if(!texture || doUpdateTexture) {
+        updateSize();
 
-    if(temp){
-        delete texture;
-        texture = new GuiTexture(temp);
-        texture->setParent(this);
-        texture->setBlendMode(SDL_BLENDMODE_BLEND);
+        SDL_Texture *temp = SDL_CreateTexture(renderer->getRenderer(), renderer->getPixelFormat(), SDL_TEXTUREACCESS_TARGET, (int) width, (int) height);
+        if (temp) {
+            delete texture;
+            texture = new GuiTexture(temp);
+            texture->setParent(this);
+            texture->setBlendMode(SDL_BLENDMODE_BLEND);
 
-        FC_DrawColumnToTexture(fc_font, temp, 0,0, maxWidth, text.c_str());
-    }else{
-        DEBUG_FUNCTION_LINE("Failed to create texture");
+            FC_DrawColumnToTexture(fc_font, temp, 0, 0, maxWidth, text.c_str());
+            doUpdateTexture = false;
+        } else {
+            DEBUG_FUNCTION_LINE("Failed to create texture");
+        }
     }
 }
