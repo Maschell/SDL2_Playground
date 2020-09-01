@@ -10,8 +10,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: build binary
       run: |
-        docker build . -f .\Dockerfile.pc-win  -t sdl2_playground-builder-pc-win
-        docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc-win make -f .\Makefile.pc-win
+        docker build . -f Dockerfile.pc-win  -t sdl2_playground-builder-pc-win
+        docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc-win make -f Makefile.pc-win
     - uses: actions/upload-artifact@master
       with:
        name: binary
