@@ -11,8 +11,8 @@ add_executable(${PROJECT_NAME}
         src/gui/GuiImage.cpp
         src/gui/GuiImage.h
         src/gui/sigslot.h
-        src/CVideo.cpp
-        src/CVideo.h
+        src/system/SDLSystem.cpp
+        src/system/SDLSystem.h
         src/gui/GuiElement.cpp
         src/gui/GuiText.cpp
         src/gui/GuiText.h
@@ -25,13 +25,14 @@ add_executable(${PROJECT_NAME}
         src/gui/GuiButton.h
 
 
-        src/gui/SDLController.h src/MainWindow.cpp src/MainWindow.h src/gui/SDLControllerJoystick.h src/gui/SDLControllerMouse.h
-        src/gui/SDLControllerWiiUGamepad.h
-        src/gui/SDLControllerWiiUProContoller.h
+        src/input/SDLController.h src/menu/MainWindow.cpp src/menu/MainWindow.h src/input/SDLControllerJoystick.h src/input/SDLControllerMouse.h
+        src/input/SDLControllerWiiUGamepad.h
+        src/input/SDLControllerWiiUProContoller.h
         src/gui/GuiTexture.cpp src/gui/GuiTexture.h
-        src/gui/SDL_FontCache.h src/gui/SDL_FontCache.c
+        src/system/video/SDL_FontCache.h
+        src/system/video/SDL_FontCache.cpp
 
-        )
+        src/system/video/Renderer.h)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 

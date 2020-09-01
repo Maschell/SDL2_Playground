@@ -17,7 +17,7 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include "GuiImage.h"
-#include "../CVideo.h"
+#include "../system/SDLSystem.h"
 
 GuiImage::GuiImage(const std::string& path) : GuiTexture(path){
 }

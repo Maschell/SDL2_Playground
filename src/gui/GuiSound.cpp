@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "GuiSound.h"
-#include "../logger.h"
+#include "../utils/logger.h"
 
 GuiSound::GuiSound(const char *filepath) {
     Load(filepath);

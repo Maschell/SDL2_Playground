@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "gui/SDL_FontCache.h"
 
 MainWindow::~MainWindow() {
     delete label;;
@@ -16,7 +15,7 @@ MainWindow::~MainWindow() {
     delete bgMusic;;
 }
 
-MainWindow::MainWindow(int32_t w, int32_t h) : GuiFrame(w, h) {
+MainWindow::MainWindow(int32_t w, int32_t h, Renderer* renderer) : GuiFrame(w, h) {
 #if defined _WIN32
     auto picture_path = "test.png";
     auto font_path = "FreeSans.ttf";
@@ -34,7 +33,14 @@ MainWindow::MainWindow(int32_t w, int32_t h) : GuiFrame(w, h) {
 
     font = TTF_OpenFont(font_path, 28);
 
-    label = new GuiText("This is a test.This is a test. This is a test.This is a test.This is a test.This is a test.", 25, {255, 255, 0, 255}, font);
+    FC_Font* fc_font = FC_CreateFont();
+    if(!fc_font){
+        DEBUG_FUNCTION_LINE("Failed to create font");
+    }
+
+    FC_LoadFontFromTTF(fc_font, renderer->getRenderer(), font, {255, 255, 255, 255});
+
+    label = new GuiText("This is a test.This is a test. This is a test.This is a test.This is a test.This is a test.", {255, 255, 0, 255}, fc_font);
 
     bgMusic = new GuiSound(bgMusic_path);
     bgMusic->SetLoop(true);
@@ -86,4 +92,8 @@ void MainWindow::process() {
         res = 0;
     }
     button->setAngle(res);
+}
+
+void MainWindow::test(GuiButton *, const GuiController *, GuiTrigger *) {
+        DEBUG_FUNCTION_LINE("Hello, you have clicked the button");
 }

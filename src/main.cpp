@@ -1,17 +1,17 @@
 #include <SDL2/SDL.h>
-#include "CVideo.h"
+#include "system/SDLSystem.h"
 #include "gui/GuiFrame.h"
 #include "gui/GuiImage.h"
 #include "gui/GuiButton.h"
 #include "gui/GuiController.h"
-#include "gui/SDLController.h"
-#include "MainWindow.h"
-#include "logger.h"
-#include "gui/SDLControllerJoystick.h"
-#include "gui/SDLControllerMouse.h"
-#include "gui/SDLControllerWiiUGamepad.h"
-#include "gui/SDLControllerXboxOne.h"
-#include "gui/SDLControllerWiiUProContoller.h"
+#include "menu/MainWindow.h"
+#include "utils/logger.h"
+#include "input/SDLController.h"
+#include "input/SDLControllerMouse.h"
+#include "input/SDLControllerWiiUGamepad.h"
+#include "input/SDLControllerXboxOne.h"
+#include "input/SDLControllerWiiUProContoller.h"
+#include "input/SDLControllerJoystick.h"
 
 #include <cstdio>
 #include <fcntl.h>
@@ -58,7 +58,7 @@ GuiTrigger::eChannels increaseChannel(GuiTrigger::eChannels channel);
 void removeJoystick(int32_t instanceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel);
 
 int main(int argc, char *args[]) {
-    auto *video = new CVideo();
+    auto *video = new SDLSystem();
 
 #if defined _WIN32
     // Create the Console
@@ -82,7 +82,7 @@ int main(int argc, char *args[]) {
     WHBLogUdpInit();
 #endif
 
-    GuiFrame *frame = new MainWindow(video->getWidth(), video->getHeight());
+    GuiFrame *frame = new MainWindow(video->getWidth(), video->getHeight(), video->getRenderer());
 
     std::map<GuiTrigger::eChannels, SDLController*> controllerList;
     std::map<int32_t , GuiTrigger::eChannels> joystickToChannel;
@@ -99,7 +99,6 @@ int main(int argc, char *args[]) {
             break;
         }
 #endif
-
         //! Read out inputs
         for( auto const& [channel, controller] : controllerList ){
             controller->before();
@@ -156,15 +155,25 @@ int main(int argc, char *args[]) {
         frame->process();
 
         // clear the screen
-        SDL_RenderClear(video->getRenderer());
+        SDL_RenderClear(video->getRenderer()->getRenderer());
 
-        frame->draw(video);
+        frame->draw(video->getRenderer());
 
         frame->updateEffects();
 
         // flip the backbuffer
         // this means that everything that we prepared behind the screens is actually shown
-        SDL_RenderPresent(video->getRenderer());
+
+        DEBUG_FUNCTION_LINE("%08X", video);
+        if(video){
+            DEBUG_FUNCTION_LINE("%08X", video->getRenderer());
+            if(video->getRenderer()){
+                DEBUG_FUNCTION_LINE("%08X", video->getRenderer()->getRenderer());
+                if(video->getRenderer()->getRenderer()) {
+                    SDL_RenderPresent(video->getRenderer()->getRenderer());
+                }
+            }
+        }
 
     }
 

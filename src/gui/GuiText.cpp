@@ -17,23 +17,19 @@
 #include <cstdarg>
 #include <SDL2/SDL_surface.h>
 #include "GuiText.h"
-#include "../CVideo.h"
-#include "../logger.h"
-#include "SDL_FontCache.h"
-
 
 /**
  * Constructor for the GuiText class.
  */
 
-GuiText::GuiText(const std::string& text, int32_t s, SDL_Color c, TTF_Font* gFont) {
+GuiText::GuiText(const std::string& text, SDL_Color c, FC_Font* gFont) {
    this->text = text;
-   this->size = s;
    this->color = c;
-   this->ttf_font = gFont;
-   this->invalid = true;
-   this->updateText = true;
-   this->maxWidth = 200;
+   this->fc_font = gFont;
+   this->updateText = false;
+
+   updateSize();
+   updateTexture();
 }
 
 GuiText::~GuiText(){
@@ -44,45 +40,13 @@ GuiText::~GuiText(){
     delete texture;
 }
 
-void GuiText::draw(CVideo *pVideo) {
+void GuiText::draw(Renderer *renderer) {
     if (!this->isVisible()) {
         return;
     }
-    if(invalid){
-        if(fc_font){
-            FC_FreeFont(fc_font);
-            fc_font = nullptr;
-        }
-        fc_font = FC_CreateFont();
-        invalid = !FC_LoadFontFromTTF(fc_font, pVideo->getRenderer(), this->ttf_font, color);
-        DEBUG_FUNCTION_LINE("FC_CACHE init done");
-    }
-
-    if(updateText || !texture){
-        delete texture;
-        // Create the intermediate texture target
-        SDL_Texture* temp = SDL_CreateTexture(pVideo->getRenderer(), pVideo->getPixelFormat(), SDL_TEXTUREACCESS_TARGET, width, height);
-        if(temp){
-            texture = new GuiTexture(temp);
-            texture->setParent(this);
-            texture->setBlendMode(SDL_BLENDMODE_BLEND);
-
-            // Draw the text onto it
-            SDL_SetRenderTarget(pVideo->getRenderer(), temp);
-            // make sure the texture is clean.
-            SDL_RenderClear(pVideo->getRenderer());
-            FC_DrawColumn(fc_font, pVideo->getRenderer(), 0, 0, maxWidth, text.c_str());
-            SDL_SetRenderTarget(pVideo->getRenderer(), NULL);
-
-            updateText = false;
-        }else{
-            DEBUG_FUNCTION_LINE("Failed to create texture");
-        }
-
-    }
 
     if(texture){
-        texture->draw(pVideo);
+        texture->draw(renderer);
     }
 }
 
@@ -90,15 +54,37 @@ void GuiText::process() {
     GuiElement::process();
 
     if(updateText && fc_font){
-        auto height = FC_GetColumnHeight(fc_font, maxWidth, text.c_str());
-        auto width = FC_GetWidth(fc_font, text.c_str());
-        width = width > maxWidth ? maxWidth : width;
-        this->setSize(width, height);
+        updateTexture();
+        updateText = false;
     }
 }
 
 void GuiText::setMaxWidth(float width) {
     this->maxWidth = width;
+
     // Rebuild the texture cache.
     updateText = true;
+}
+
+void GuiText::updateSize() {
+    auto height = FC_GetColumnHeight(fc_font, maxWidth, text.c_str());
+    auto width = FC_GetWidth(fc_font, text.c_str());
+    width = width > maxWidth ? maxWidth : width;
+    this->setSize(width, height);
+}
+
+void GuiText::updateTexture() {
+    updateSize();
+    SDL_Texture* temp = FC_CreateTexture(fc_font,   SDL_PIXELFORMAT_RGBA8888, width, height);
+
+    if(temp){
+        delete texture;
+        texture = new GuiTexture(temp);
+        texture->setParent(this);
+        texture->setBlendMode(SDL_BLENDMODE_BLEND);
+
+        FC_DrawColumnToTexture(fc_font, temp, 0,0, maxWidth, text.c_str());
+    }else{
+        DEBUG_FUNCTION_LINE("Failed to create texture");
+    }
 }

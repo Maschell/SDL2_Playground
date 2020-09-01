@@ -17,11 +17,10 @@
 #pragma once
 
 #include "GuiElement.h"
-#include "SDL_FontCache.h"
 #include "GuiTexture.h"
+#include "../system/video/SDL_FontCache.h"
 #include <mutex>
 #include <SDL2/SDL_ttf.h>
-
 
 //!Display, manage, and manipulate text in the GUI
 class GuiText : public GuiElement {
@@ -30,10 +29,10 @@ public:
     //!\param t Text
     //!\param s Font size
     //!\param c Font color
-    GuiText(const std::string &t, int32_t s, SDL_Color c, TTF_Font *gFont);
+    GuiText(const std::string &t, SDL_Color c, FC_Font *font);
     ~GuiText() override;
 
-    void draw(CVideo *pVideo) override;
+    void draw(Renderer *pVideo) override;
 
     void process() override;
 
@@ -42,12 +41,13 @@ public:
 protected:
     GuiTexture* texture = nullptr;
     std::string text;
-    int32_t size;
     SDL_Color color;
-    TTF_Font *ttf_font = nullptr;
     FC_Font *fc_font = nullptr;
-    bool invalid = true;
     bool updateText = true;
 
     uint16_t maxWidth = 0xFFFF;
+
+    void updateSize();
+
+    void updateTexture();
 };
