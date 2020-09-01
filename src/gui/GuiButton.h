@@ -20,7 +20,7 @@
 #include "GuiText.h"
 #include "GuiSound.h"
 #include "GuiTrigger.h"
-#include "../CVideo.h"
+#include "../system/SDLSystem.h"
 
 //!Display, manage, and manipulate buttons in the GUI. Buttons can have images, icons, text, and sound set (all of which are optional)
 class GuiButton : public GuiElement {
@@ -94,7 +94,7 @@ public:
     void resetState(void) override;
 
     //!Constantly called to draw the GuiButton
-    void draw(CVideo *video) override;
+    void draw(Renderer *video) override;
 
     //!Constantly called to allow the GuiButton to respond to updated input data
     //!\param t Pointer to a GuiTrigger, containing the current input data from PAD/WPAD

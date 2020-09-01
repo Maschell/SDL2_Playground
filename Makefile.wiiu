@@ -21,7 +21,12 @@ WUMS_ROOT := $(DEVKITPRO)/wums
 TARGET		:=	SDL2_Playground
 BUILD		:=	build
 SOURCES		:=	src \
-                src/gui
+				src/gui \
+				src/input \
+				src/menu \
+				src/system \
+				src/system/video \
+				src/utils
 DATA		:=	data
 INCLUDES	:=	source
 

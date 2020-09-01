@@ -20,14 +20,15 @@
 #include <vector>
 
 #include <malloc.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
-#include <wchar.h>
-#include <math.h>
+#include <cwchar>
+#include <cmath>
 #include <iostream>
 #include "sigslot.h"
+#include "../system/video/Renderer.h"
 
 enum {
     EFFECT_NONE =               0x00,
@@ -59,7 +60,7 @@ enum {
 //!Forward declaration
 class GuiController;
 
-class CVideo;
+class SDLSystem;
 
 //!Primary GUI class. Most other classes inherit from this class.
 class GuiElement {
@@ -524,7 +525,7 @@ public:
     virtual void update(GuiController *t) {}
 
     //!Called constantly to redraw the element
-    virtual void draw(CVideo *v) {}
+    virtual void draw(Renderer * v) {}
 
     //!Called constantly to process stuff in the element
     virtual void process() {}

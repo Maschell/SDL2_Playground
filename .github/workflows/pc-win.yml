@@ -1,0 +1,18 @@
+name: Windows building.
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-binary:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: build binary
+      run: |
+        docker build . -f .\Dockerfile.pc-win  -t sdl2_playground-builder-pc-win
+        docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc-win make -f .\Makefile.pc-win
+    - uses: actions/upload-artifact@master
+      with:
+       name: binary
+       path: "*.exe"

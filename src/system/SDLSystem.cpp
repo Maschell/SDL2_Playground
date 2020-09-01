@@ -14,22 +14,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#include "CVideo.h"
-#include "logger.h"
+#include "SDLSystem.h"
+#include "../utils/logger.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
-CVideo::CVideo() {
+SDLSystem::SDLSystem() {
     SDL_Init(SDL_INIT_EVERYTHING);
 
     auto SDLFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
 
     //Setup window
     window = SDL_CreateWindow(nullptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, 0);
-    if (!window) { return; }
-    renderer = SDL_CreateRenderer(window, -1, SDLFlags);
-    if (!renderer) { return; }
-    SDL_SetRenderTarget(renderer, NULL);
+    if (!window) {
+        DEBUG_FUNCTION_LINE("Failed to create window");
+        return;
+    }
+    auto sdl_renderer = SDL_CreateRenderer(window, -1, SDLFlags);
+    if (!sdl_renderer) {
+        DEBUG_FUNCTION_LINE("Failed to init sdl renderer");
+        return;
+    }
+    SDL_SetRenderTarget(sdl_renderer, nullptr);
+    this->renderer = new Renderer(sdl_renderer, SDL_GetWindowPixelFormat(window));
+    if (!renderer) {
+        DEBUG_FUNCTION_LINE("Failed to init renderer");
+        return;
+    }
 
     if (SDL_Init(SDL_INIT_AUDIO) != 0) {
         DEBUG_FUNCTION_LINE("SDL init error: %s\n", SDL_GetError());
@@ -47,28 +58,24 @@ CVideo::CVideo() {
     SDL_PauseAudioDevice(dev, 0);
 }
 
-CVideo::~CVideo() {
-    SDL_DestroyRenderer(renderer);
+SDLSystem::~SDLSystem() {
     SDL_DestroyWindow(window);
+    delete renderer;
     SDL_Quit();
 }
 
-SDL_Renderer *CVideo::getRenderer() {
-    return renderer;
-}
-
-float CVideo::getHeight() {
+float SDLSystem::getHeight() {
     int h = 0;
-    SDL_GetWindowSize(window, NULL, &h);
+    SDL_GetWindowSize(window, nullptr, &h);
     return h;
 }
 
-float CVideo::getWidth() {
+float SDLSystem::getWidth() {
     int w = 0;
-    SDL_GetWindowSize(window, &w, NULL);
+    SDL_GetWindowSize(window, &w, nullptr);
     return w;
 }
 
-unsigned int CVideo::getPixelFormat() {
-    return SDL_GetWindowPixelFormat(window);
+Renderer *SDLSystem::getRenderer() {
+    return renderer;
 }

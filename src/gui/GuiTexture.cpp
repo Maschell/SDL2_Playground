@@ -1,7 +1,7 @@
 #include <SDL2/SDL_image.h>
 #include "GuiTexture.h"
-#include "../CVideo.h"
-#include "../logger.h"
+#include "../system/SDLSystem.h"
+#include "../utils/logger.h"
 
 GuiTexture::GuiTexture(const std::string& path) {
     imgSurface = IMG_Load( path.c_str() );
@@ -49,20 +49,20 @@ GuiTexture::~GuiTexture() {
     }
 }
 
-void GuiTexture::draw(CVideo *pVideo) {
+void GuiTexture::draw(Renderer *renderer) {
     if (!this->isVisible()) {
         DEBUG_FUNCTION_LINE("not visible!");
         return;
     }
 
     if (texture == NULL && imgSurface) {
-        SDL_Surface *optimizedSurface = SDL_ConvertSurfaceFormat(imgSurface, pVideo->getPixelFormat(), 0);
+        SDL_Surface *optimizedSurface = SDL_ConvertSurfaceFormat(imgSurface, renderer->getPixelFormat(), 0);
         if (optimizedSurface != NULL) {
             SDL_FreeSurface(imgSurface);
             imgSurface = optimizedSurface;
             DEBUG_FUNCTION_LINE("Optimized surface");
         }
-        texture = SDL_CreateTextureFromSurface(pVideo->getRenderer(), imgSurface);
+        texture = SDL_CreateTextureFromSurface(renderer->getRenderer(), imgSurface);
     }
     if (!texture) {
         DEBUG_FUNCTION_LINE("no texture!");
@@ -79,9 +79,9 @@ void GuiTexture::draw(CVideo *pVideo) {
     rect.h = currScaleY * getHeight();
 
     if (getAngle() == 0) {
-        SDL_RenderCopy(pVideo->getRenderer(), texture, nullptr, &rect);
+        SDL_RenderCopy(renderer->getRenderer(), texture, nullptr, &rect);
     } else {
-        SDL_RenderCopyEx(pVideo->getRenderer(), texture, nullptr, &rect, getAngle(), nullptr, SDL_FLIP_NONE);
+        SDL_RenderCopyEx(renderer->getRenderer(), texture, nullptr, &rect, getAngle(), nullptr, SDL_FLIP_NONE);
     }
 }
 

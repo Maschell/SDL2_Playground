@@ -1,17 +1,18 @@
 #include <SDL2/SDL.h>
-#include "CVideo.h"
+#include "system/SDLSystem.h"
 #include "gui/GuiFrame.h"
 #include "gui/GuiImage.h"
 #include "gui/GuiButton.h"
 #include "gui/GuiController.h"
-#include "gui/SDLController.h"
-#include "MainWindow.h"
-#include "logger.h"
-#include "gui/SDLControllerJoystick.h"
-#include "gui/SDLControllerMouse.h"
-#include "gui/SDLControllerWiiUGamepad.h"
-#include "gui/SDLControllerXboxOne.h"
-#include "gui/SDLControllerWiiUProContoller.h"
+#include "menu/MainWindow.h"
+#include "utils/logger.h"
+#include "input/SDLController.h"
+#include "input/SDLControllerMouse.h"
+#include "input/SDLControllerWiiUGamepad.h"
+#include "input/SDLControllerXboxOne.h"
+#include "input/SDLControllerWiiUProContoller.h"
+#include "input/SDLControllerJoystick.h"
+#include "input/ControllerManager.h"
 
 #include <cstdio>
 #include <fcntl.h>
@@ -51,14 +52,9 @@ bool CheckRunning(){
 }
 #endif
 
-bool addJoystick(int deviceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel);
-
-GuiTrigger::eChannels increaseChannel(GuiTrigger::eChannels channel);
-
-void removeJoystick(int32_t instanceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel);
 
 int main(int argc, char *args[]) {
-    auto *video = new CVideo();
+    auto *system = new SDLSystem();
 
 #if defined _WIN32
     // Create the Console
@@ -82,14 +78,14 @@ int main(int argc, char *args[]) {
     WHBLogUdpInit();
 #endif
 
-    GuiFrame *frame = new MainWindow(video->getWidth(), video->getHeight());
+    auto * frame = new MainWindow(system->getWidth(), system->getHeight(), system->getRenderer());
 
-    std::map<GuiTrigger::eChannels, SDLController*> controllerList;
-    std::map<int32_t , GuiTrigger::eChannels> joystickToChannel;
+    auto * controllerM = new ControllerManager(system->getWidth(), system->getHeight());
+
 
 #if defined _WIN32
-    controllerList[GuiTrigger::CHANNEL_1] = new SDLControllerMouse(GuiTrigger::CHANNEL_1);
-    DEBUG_FUNCTION_LINE("Add mouse");
+    controllerM->attachController(GuiTrigger::CHANNEL_1, new SDLControllerMouse(GuiTrigger::CHANNEL_1));
+    DEBUG_FUNCTION_LINE("Added mouse");
 #endif
 
     while (true) {
@@ -99,11 +95,8 @@ int main(int argc, char *args[]) {
             break;
         }
 #endif
-
-        //! Read out inputs
-        for( auto const& [channel, controller] : controllerList ){
-            controller->before();
-        }
+        // Prepare to process new events.
+        controllerM->prepare();
 
         bool quit = false;
         SDL_Event e;
@@ -111,12 +104,12 @@ int main(int argc, char *args[]) {
             int32_t channel = -1;
             SDL_JoystickID jId = -1;
             if(e.type == SDL_JOYDEVICEADDED) {
-                addJoystick(e.jdevice.which, controllerList, joystickToChannel);
+                controllerM->attachJoystick(e.jdevice.which);
                 continue;
             }else if(e.type ==  SDL_JOYDEVICEREMOVED) {
                 auto j = SDL_JoystickFromInstanceID(e.jdevice.which);
                 if (j) {
-                    removeJoystick(e.jdevice.which, controllerList, joystickToChannel);
+                    controllerM->detachJoystick(e.jdevice.which);
                     SDL_JoystickClose(j);
                     continue;
                 }
@@ -133,105 +126,32 @@ int main(int argc, char *args[]) {
                 quit = true;
                 break;
             }
-
-            if(jId != -1){
-                if(joystickToChannel.find(jId) != joystickToChannel.end()){
-                    channel = joystickToChannel[jId];
-                }
-            }
-            if(channel != -1){
-                controllerList[static_cast<GuiTrigger::eChannels>(channel)]->update(&e, video->getWidth(), video->getHeight());
-            }
-        }
-        if(quit){
-            break;
+            controllerM->processEvent(jId, channel, &e);
         }
 
-        for( auto const& [joypad, controller] : controllerList ){
-            controller->after();
+        if(quit){ break; }
 
-            frame->update(controller);
-        }
+        // Finish controller inputs
+        controllerM->finish();
+
+        // Update gui elements based on controller inputs
+        controllerM->callPerController([frame](GuiController* controller) { frame->update(controller);});
 
         frame->process();
 
         // clear the screen
-        SDL_RenderClear(video->getRenderer());
+        SDL_RenderClear(system->getRenderer()->getRenderer());
 
-        frame->draw(video);
+        frame->draw(system->getRenderer());
 
         frame->updateEffects();
 
         // flip the backbuffer
         // this means that everything that we prepared behind the screens is actually shown
-        SDL_RenderPresent(video->getRenderer());
-
+        SDL_RenderPresent(system->getRenderer()->getRenderer());
     }
 
     delete frame;
 
     return 0;
-}
-
-void removeJoystick(int32_t instanceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel) {
-    auto channel = joystickToChannel[instanceId];
-    delete controllerList[channel];
-    controllerList.erase(channel);
-    joystickToChannel.erase(instanceId);
-    DEBUG_FUNCTION_LINE("Removed joystick: %d", instanceId);
-}
-
-bool addJoystick(int deviceId, std::map<GuiTrigger::eChannels, SDLController *> &controllerList, std::map<int32_t, GuiTrigger::eChannels>& joystickToChannel) {
-    auto joystick = SDL_JoystickOpen(deviceId);
-    if (joystick == NULL){
-        DEBUG_FUNCTION_LINE("SDL_JoystickOpen failed: %s\n", SDL_GetError());
-        return false;
-    }
-    auto instanceId = SDL_JoystickInstanceID(joystick);
-    if(std::string("WiiU Gamepad").compare(SDL_JoystickName(joystick)) == 0){
-        controllerList[GuiTrigger::CHANNEL_1] = new SDLControllerWiiUGamepad(GuiTrigger::CHANNEL_1);
-        joystickToChannel[instanceId] = GuiTrigger::CHANNEL_1;
-    }else {
-        bool successfully_added = false;
-        auto channel = GuiTrigger::CHANNEL_2;
-        while(channel != GuiTrigger::CHANNEL_ALL){
-            if(controllerList.find(channel) == controllerList.end()) {
-                if (std::string(SDL_JoystickName(joystick)).find("Xbox") != std::string::npos){
-                    controllerList[channel] = new SDLControllerXboxOne(channel);
-                }else if(std::string(SDL_JoystickName(joystick)).find("WiiU Pro Controller") != std::string::npos) {
-                    controllerList[channel] = new SDLControllerWiiUProContoller(channel);
-                }else{
-                    controllerList[channel] = new SDLControllerJoystick(channel, instanceId);
-                }
-                joystickToChannel[instanceId] = channel;
-                successfully_added = true;
-                break;
-            }
-            channel = increaseChannel(channel);
-        }
-        if(!successfully_added){
-            DEBUG_FUNCTION_LINE("Failed to add joystick. Closing it now");
-            SDL_JoystickClose(joystick);
-            return false;
-        }
-    }
-    DEBUG_FUNCTION_LINE("Added joystick %s", SDL_JoystickName(joystick));
-    return true;
-}
-
-GuiTrigger::eChannels increaseChannel(GuiTrigger::eChannels channel) {
-    switch(channel){
-        case GuiTrigger::CHANNEL_1:
-            return GuiTrigger::CHANNEL_2;
-        case GuiTrigger::CHANNEL_2:
-            return GuiTrigger::CHANNEL_3;
-        case GuiTrigger::CHANNEL_3:
-            return GuiTrigger::CHANNEL_4;
-        case GuiTrigger::CHANNEL_4:
-            return GuiTrigger::CHANNEL_5;
-        case GuiTrigger::CHANNEL_5:
-        case GuiTrigger::CHANNEL_ALL:
-            return GuiTrigger::CHANNEL_ALL;
-    }
-    return GuiTrigger::CHANNEL_ALL;
 }

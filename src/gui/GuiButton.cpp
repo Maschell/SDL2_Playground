@@ -133,7 +133,7 @@ void GuiButton::setTrigger(GuiTrigger *t, int32_t idx) {
     }
 }
 
-void GuiButton::resetState(void) {
+void GuiButton::resetState() {
     clickedTrigger = NULL;
     heldTrigger = NULL;
     GuiElement::resetState();
@@ -142,7 +142,7 @@ void GuiButton::resetState(void) {
 /**
  * Draw the button on screen
  */
-void GuiButton::draw(CVideo *v) {
+void GuiButton::draw(Renderer *v) {
     if (!this->isVisible()) {
         return;
     }

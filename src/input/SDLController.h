@@ -3,8 +3,8 @@
 #include <SDL2/SDL_mouse.h>
 #include <iostream>
 #include <SDL2/SDL_events.h>
-#include "GuiController.h"
-#include "../logger.h"
+#include "../gui/GuiController.h"
+#include "../utils/logger.h"
 
 #define printButton(chan, x)  if(data.buttons_d & x) DEBUG_FUNCTION_LINE("Controller #%d %s", chan, #x)
 

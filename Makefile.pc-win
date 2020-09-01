@@ -28,7 +28,12 @@ endif
 TARGET		:=	SDL2_Playground
 BUILD		:=	build-pc-win
 SOURCES		:=	src \
-                src/gui
+				src/gui \
+				src/input \
+				src/menu \
+				src/system \
+				src/system/video \
+				src/utils
 DATA		:=	data
 INCLUDES	:=	source
 

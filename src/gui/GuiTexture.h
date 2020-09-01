@@ -12,7 +12,7 @@ public:
     ~GuiTexture() override;
 
     //!Constantly called to draw the image
-    void draw(CVideo *pVideo) override;
+    void draw(Renderer *pVideo) override;
 
     int setBlendMode(SDL_BlendMode blendMode);
 

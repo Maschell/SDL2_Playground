@@ -10,6 +10,7 @@ See SDL_FontCache.h for license info.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mutex>
 
 // Visual C does not support static inline
 #ifndef static_inline
@@ -79,7 +80,6 @@ __inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
 
 // Extra pixels of padding around each glyph to avoid linear filtering artifacts
 #define FC_CACHE_PADDING 1
-
 
 
 static Uint8 has_clip(FC_Target* dest)
@@ -236,7 +236,7 @@ char* FC_GetStringASCII_Latin1(void)
 
 FC_Rect FC_MakeRect(float x, float y, float w, float h)
 {
-    FC_Rect r = {x, y, w, h};
+    FC_Rect r = {(int) x, (int) y, (int) w, (int) h};
     return r;
 }
 
@@ -451,8 +451,9 @@ struct FC_Font
     FC_Image** glyph_cache;
 
     char* loading_string;
-
 };
+
+std::recursive_mutex mutex;
 
 // Private
 static FC_GlyphData* FC_PackGlyphData(FC_Font* font, Uint32 codepoint, Uint16 width, Uint16 maxWidth, Uint16 maxHeight);
@@ -622,7 +623,7 @@ static_inline FC_Rect FC_RectUnion(FC_Rect A, FC_Rect B)
     x2 = FC_MAX(A.x+A.w, B.x+B.w);
     y2 = FC_MAX(A.y+A.h, B.y+B.h);
     {
-        FC_Rect result = {x, y, FC_MAX(0, x2 - x), FC_MAX(0, y2 - y)};
+        FC_Rect result = {(int) x, (int) y, (int) FC_MAX(0, x2 - x), (int) FC_MAX(0, y2 - y)};
         return result;
     }
 }
@@ -1180,7 +1181,7 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
     #endif
 
     FC_ClearFont(font);
-
+    std::scoped_lock lock(mutex);
 
     // Might as well check render target support here
     #ifdef FC_USE_SDL_GPU
@@ -1287,6 +1288,8 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
             #endif
         }
     }
+
+
 
     return 1;
 }
@@ -1767,14 +1770,14 @@ FC_Rect FC_Draw(FC_Font* font, FC_Target* dest, float x, float y, const char* fo
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
 
+    std::scoped_lock lock(mutex);
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
-
     set_color_for_all_caches(font, font->default_color);
 
-    return FC_RenderLeft(font, dest, x, y, FC_MakeScale(1,1), fc_buffer);
+    auto res = FC_RenderLeft(font, dest, x, y, FC_MakeScale(1,1), fc_buffer);
+
+    return res;
 }
-
-
 
 typedef struct FC_StringList
 {
@@ -2059,6 +2062,8 @@ FC_Rect FC_DrawBox(FC_Font* font, FC_Target* dest, FC_Rect box, const char* form
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(box.x, box.y, 0, 0);
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     useClip = has_clip(dest);
@@ -2091,6 +2096,8 @@ FC_Rect FC_DrawBoxAlign(FC_Font* font, FC_Target* dest, FC_Rect box, FC_AlignEnu
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(box.x, box.y, 0, 0);
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     useClip = has_clip(dest);
@@ -2121,6 +2128,8 @@ FC_Rect FC_DrawBoxScale(FC_Font* font, FC_Target* dest, FC_Rect box, FC_Scale sc
     Uint8 useClip;
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(box.x, box.y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2153,6 +2162,8 @@ FC_Rect FC_DrawBoxColor(FC_Font* font, FC_Target* dest, FC_Rect box, SDL_Color c
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(box.x, box.y, 0, 0);
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     useClip = has_clip(dest);
@@ -2184,6 +2195,8 @@ FC_Rect FC_DrawBoxEffect(FC_Font* font, FC_Target* dest, FC_Rect box, FC_Effect 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(box.x, box.y, 0, 0);
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     useClip = has_clip(dest);
@@ -2211,11 +2224,13 @@ FC_Rect FC_DrawBoxEffect(FC_Font* font, FC_Target* dest, FC_Rect box, FC_Effect 
 
 FC_Rect FC_DrawColumn(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, const char* formatted_text, ...)
 {
-    FC_Rect box = {x, y, width, 0};
+    FC_Rect box = {(int) x, (int) y, (int) width, (int) 0};
     int total_height;
 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2223,16 +2238,34 @@ FC_Rect FC_DrawColumn(FC_Font* font, FC_Target* dest, float x, float y, Uint16 w
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(1,1), FC_ALIGN_LEFT);
 
-    return FC_MakeRect(box.x, box.y, width, total_height);
+    auto res = FC_MakeRect(box.x, box.y, width, total_height);
+
+    return res;
+}
+
+FC_Rect FC_DrawColumnToTexture(FC_Font* font, SDL_Texture* target, float x, float y, Uint16 width, const char* text)
+{
+    std::scoped_lock lock(mutex);
+
+    // Draw the text onto it
+    SDL_SetRenderTarget(font->renderer, target);
+    // make sure the texture is clean.
+    SDL_RenderClear(font->renderer);
+    FC_Rect res = FC_DrawColumn(font, font->renderer, x, y, width, text);
+    SDL_SetRenderTarget(font->renderer, NULL);
+
+    return res;
 }
 
 FC_Rect FC_DrawColumnAlign(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_AlignEnum align, const char* formatted_text, ...)
 {
-    FC_Rect box = {x, y, width, 0};
+    FC_Rect box = {(int) x, (int) y, (int) width, (int) 0};
     int total_height;
 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2252,16 +2285,20 @@ FC_Rect FC_DrawColumnAlign(FC_Font* font, FC_Target* dest, float x, float y, Uin
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(1,1), align);
 
-    return FC_MakeRect(box.x, box.y, width, total_height);
+    auto res = FC_MakeRect(box.x, box.y, width, total_height);
+
+    return res;
 }
 
 FC_Rect FC_DrawColumnScale(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_Scale scale, const char* formatted_text, ...)
 {
-    FC_Rect box = {x, y, width, 0};
+    FC_Rect box = {(int) x, (int) y, (int) width, (int) 0};
     int total_height;
 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2269,16 +2306,22 @@ FC_Rect FC_DrawColumnScale(FC_Font* font, FC_Target* dest, float x, float y, Uin
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, scale, FC_ALIGN_CENTER);
 
-    return FC_MakeRect(box.x, box.y, width, total_height);
+    auto res = FC_MakeRect(box.x, box.y, width, total_height);
+
+
+
+    return res;
 }
 
 FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, const char* formatted_text, ...)
 {
-    FC_Rect box = {x, y, width, 0};
+    FC_Rect box = {(int) x, (int) y, (int) width, (int) 0};
     int total_height;
 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2286,16 +2329,22 @@ FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uin
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(1,1), FC_ALIGN_LEFT);
 
-    return FC_MakeRect(box.x, box.y, width, total_height);
+    auto res = FC_MakeRect(box.x, box.y, width, total_height);
+
+
+
+    return res;
 }
 
 FC_Rect FC_DrawColumnEffect(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_Effect effect, const char* formatted_text, ...)
 {
-    FC_Rect box = {x, y, width, 0};
+    FC_Rect box = {(int) x, (int) y, (int) width, (int) 0};
     int total_height;
 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2315,12 +2364,16 @@ FC_Rect FC_DrawColumnEffect(FC_Font* font, FC_Target* dest, float x, float y, Ui
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, effect.scale, effect.alignment);
 
-    return FC_MakeRect(box.x, box.y, width, total_height);
+    auto res = FC_MakeRect(box.x, box.y, width, total_height);
+
+
+
+    return res;
 }
 
 static FC_Rect FC_RenderCenter(FC_Font* font, FC_Target* dest, float x, float y, FC_Scale scale, const char* text)
 {
-    FC_Rect result = {x, y, 0, 0};
+    FC_Rect result = {(int) x, (int) y, (int) 0, (int) 0};
     if(text == NULL || font == NULL)
         return result;
 
@@ -2353,7 +2406,7 @@ static FC_Rect FC_RenderCenter(FC_Font* font, FC_Target* dest, float x, float y,
 
 static FC_Rect FC_RenderRight(FC_Font* font, FC_Target* dest, float x, float y, FC_Scale scale, const char* text)
 {
-    FC_Rect result = {x, y, 0, 0};
+    FC_Rect result = {(int) x, (int) y, (int) 0, (int) 0};
     if(text == NULL || font == NULL)
         return result;
 
@@ -2389,17 +2442,25 @@ FC_Rect FC_DrawScale(FC_Font* font, FC_Target* dest, float x, float y, FC_Scale 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     set_color_for_all_caches(font, font->default_color);
 
-    return FC_RenderLeft(font, dest, x, y, scale, fc_buffer);
+    auto res = FC_RenderLeft(font, dest, x, y, scale, fc_buffer);
+
+
+
+    return res;
 }
 
 FC_Rect FC_DrawAlign(FC_Font* font, FC_Target* dest, float x, float y, FC_AlignEnum align, const char* formatted_text, ...)
 {
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2422,6 +2483,8 @@ FC_Rect FC_DrawAlign(FC_Font* font, FC_Target* dest, float x, float y, FC_AlignE
             break;
     }
 
+
+
     return result;
 }
 
@@ -2430,11 +2493,17 @@ FC_Rect FC_DrawColor(FC_Font* font, FC_Target* dest, float x, float y, SDL_Color
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     set_color_for_all_caches(font, color);
 
-    return FC_RenderLeft(font, dest, x, y, FC_MakeScale(1,1), fc_buffer);
+    auto res = FC_RenderLeft(font, dest, x, y, FC_MakeScale(1,1), fc_buffer);
+
+
+
+    return res;
 }
 
 
@@ -2442,6 +2511,8 @@ FC_Rect FC_DrawEffect(FC_Font* font, FC_Target* dest, float x, float y, FC_Effec
 {
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2463,6 +2534,8 @@ FC_Rect FC_DrawEffect(FC_Font* font, FC_Target* dest, float x, float y, FC_Effec
             result = FC_MakeRect(x, y, 0, 0);
             break;
     }
+
+
 
     return result;
 }
@@ -2494,6 +2567,8 @@ Uint16 FC_GetHeight(FC_Font* font, const char* formatted_text, ...)
     if(formatted_text == NULL || font == NULL)
         return 0;
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     Uint16 numLines = 1;
@@ -2506,13 +2581,19 @@ Uint16 FC_GetHeight(FC_Font* font, const char* formatted_text, ...)
     }
 
     //   Actual height of letter region + line spacing
-    return font->height*numLines + font->lineSpacing*(numLines - 1);  //height*numLines;
+    auto res =  font->height*numLines + font->lineSpacing*(numLines - 1);  //height*numLines;
+
+
+
+    return res;
 }
 
 Uint16 FC_GetWidth(FC_Font* font, const char* formatted_text, ...)
 {
     if(formatted_text == NULL || font == NULL)
         return 0;
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2536,6 +2617,8 @@ Uint16 FC_GetWidth(FC_Font* font, const char* formatted_text, ...)
     }
     bigWidth = bigWidth >= width? bigWidth : width;
 
+
+
     return bigWidth;
 }
 
@@ -2549,6 +2632,8 @@ FC_Rect FC_GetCharacterOffset(FC_Font* font, Uint16 position_index, int column_w
 
     if(formatted_text == NULL || column_width == 0 || position_index == 0 || font == NULL)
         return result;
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2589,6 +2674,8 @@ FC_Rect FC_GetCharacterOffset(FC_Font* font, Uint16 position_index, int column_w
         result.y = (num_lines - 1) * FC_GetLineHeight(font);
     }
 
+
+
     return result;
 }
 
@@ -2605,6 +2692,8 @@ Uint16 FC_GetColumnHeight(FC_Font* font, Uint16 width, const char* formatted_tex
     if(formatted_text == NULL || width == 0)
         return font->height;
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     ls = FC_GetBufferFitToColumn(font, width, FC_MakeScale(1,1), 0);
@@ -2613,6 +2702,8 @@ Uint16 FC_GetColumnHeight(FC_Font* font, Uint16 width, const char* formatted_tex
         y += FC_GetLineHeight(font);
     }
     FC_StringListFree(ls);
+
+
 
     return y;
 }
@@ -2653,6 +2744,8 @@ int FC_GetAscent(FC_Font* font, const char* formatted_text, ...)
     if(formatted_text == NULL)
         return font->ascent;
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     max = 0;
@@ -2669,6 +2762,9 @@ int FC_GetAscent(FC_Font* font, const char* formatted_text, ...)
         }
         ++c;
     }
+
+
+
     return max;
 }
 
@@ -2683,6 +2779,8 @@ int FC_GetDescent(FC_Font* font, const char* formatted_text, ...)
 
     if(formatted_text == NULL)
         return font->descent;
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2700,6 +2798,9 @@ int FC_GetDescent(FC_Font* font, const char* formatted_text, ...)
         }
         ++c;
     }
+
+
+
     return max;
 }
 
@@ -2748,7 +2849,7 @@ SDL_Color FC_GetDefaultColor(FC_Font* font)
 
 FC_Rect FC_GetBounds(FC_Font* font, float x, float y, FC_AlignEnum align, FC_Scale scale, const char* formatted_text, ...)
 {
-    FC_Rect result = {x, y, 0, 0};
+    FC_Rect result = {(int) x, (int) y, (int) 0, (int) 0};
 
     if(formatted_text == NULL)
         return result;
@@ -2798,6 +2899,8 @@ Uint16 FC_GetPositionFromOffset(FC_Font* font, float x, float y, int column_widt
     if(formatted_text == NULL || column_width == 0 || font == NULL)
         return 0;
 
+    std::scoped_lock lock(mutex);
+
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
     ls = FC_GetBufferFitToColumn(font, column_width, FC_MakeScale(1,1), 1);
@@ -2829,6 +2932,8 @@ Uint16 FC_GetPositionFromOffset(FC_Font* font, float x, float y, int column_widt
     }
     FC_StringListFree(ls);
 
+
+
     return position;
 }
 
@@ -2841,6 +2946,8 @@ int FC_GetWrappedText(FC_Font* font, char* result, int max_result_size, Uint16 w
 
     if(formatted_text == NULL || width == 0)
         return 0;
+
+    std::scoped_lock lock(mutex);
 
     FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
 
@@ -2867,14 +2974,14 @@ int FC_GetWrappedText(FC_Font* font, char* result, int max_result_size, Uint16 w
 
     result[size_so_far] = '\0';
 
+
+
     return size_so_far;
 }
 
 
 
 // Setters
-
-
 void FC_SetFilterMode(FC_Font* font, FC_FilterEnum filter)
 {
     if(font == NULL)

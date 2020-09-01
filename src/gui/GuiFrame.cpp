@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "GuiFrame.h"
+#include "../system/video/Renderer.h"
 
 GuiFrame::GuiFrame(GuiFrame *p) {
     parent = p;
@@ -156,12 +157,12 @@ int32_t GuiFrame::getSelected() {
     return found;
 }
 
-void GuiFrame::draw(CVideo *v) {
+void GuiFrame::draw(Renderer *v) {
     if (!this->isVisible() && parentElement) {
         return;
     }
 
-    if (parentElement && dim == true) {
+    if (parentElement && dim) {
         //GXColor dimColor = (GXColor){0, 0, 0, 0x70};
         //Menu_DrawRectangle(0, 0, GetZPosition(), screenwidth,screenheight, &dimColor, false, true);
     }

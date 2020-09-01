@@ -35,7 +35,8 @@ THE SOFTWARE.
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#include "../logger.h"
+#include <SDL2/SDL_pixels.h>
+#include "../../utils/logger.h"
 
 #ifdef FC_USE_SDL_GPU
     #include "SDL_gpu.h"
@@ -109,11 +110,7 @@ typedef struct FC_GlyphData
 
 } FC_GlyphData;
 
-
-
-
 // Object creation
-
 FC_Rect FC_MakeRect(float x, float y, float w, float h);
 
 FC_Scale FC_MakeScale(float x, float y);
@@ -123,8 +120,6 @@ SDL_Color FC_MakeColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 FC_Effect FC_MakeEffect(FC_AlignEnum alignment, FC_Scale scale, SDL_Color color);
 
 FC_GlyphData FC_MakeGlyphData(int cache_level, Sint16 x, Sint16 y, Uint16 w, Uint16 h);
-
-
 
 // Font object
 
@@ -212,7 +207,6 @@ void U8_strdel(char* string, int position);
 
 
 // Internal settings
-
 /*! Sets the string from which to load the initial glyphs.  Use this if you need upfront loading for any reason (such as lack of render-target support). */
 void FC_SetLoadingString(FC_Font* font, const char* string);
 
@@ -248,7 +242,6 @@ Uint8 FC_SetGlyphCacheLevel(FC_Font* font, int cache_level, FC_Image* cache_text
 /*! Copies the given surface to the given cache level as a texture.  New cache levels must be sequential. */
 Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surface);
 
-
 /*! Returns the number of codepoints that are stored in the font's glyph data map. */
 unsigned int FC_GetNumCodepoints(FC_Font* font);
 
@@ -261,9 +254,7 @@ Uint8 FC_GetGlyphData(FC_Font* font, FC_GlyphData* result, Uint32 codepoint);
 /*! Sets the glyph data for the given codepoint.  Duplicates are not checked.  Returns a pointer to the stored data. */
 FC_GlyphData* FC_SetGlyphData(FC_Font* font, Uint32 codepoint, FC_GlyphData glyph_data);
 
-
 // Rendering
-
 FC_Rect FC_Draw(FC_Font* font, FC_Target* dest, float x, float y, const char* formatted_text, ...);
 FC_Rect FC_DrawAlign(FC_Font* font, FC_Target* dest, float x, float y, FC_AlignEnum align, const char* formatted_text, ...);
 FC_Rect FC_DrawScale(FC_Font* font, FC_Target* dest, float x, float y, FC_Scale scale, const char* formatted_text, ...);
@@ -277,6 +268,7 @@ FC_Rect FC_DrawBoxColor(FC_Font* font, FC_Target* dest, FC_Rect box, SDL_Color c
 FC_Rect FC_DrawBoxEffect(FC_Font* font, FC_Target* dest, FC_Rect box, FC_Effect effect, const char* formatted_text, ...);
 
 FC_Rect FC_DrawColumn(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, const char* formatted_text, ...);
+FC_Rect FC_DrawColumnToTexture(FC_Font* font, SDL_Texture* target, float x, float y, Uint16 width, const char* text);
 FC_Rect FC_DrawColumnAlign(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_AlignEnum align, const char* formatted_text, ...);
 FC_Rect FC_DrawColumnScale(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_Scale scale, const char* formatted_text, ...);
 FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, const char* formatted_text, ...);

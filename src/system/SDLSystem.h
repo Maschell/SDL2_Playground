@@ -16,21 +16,20 @@
  ****************************************************************************/
 #pragma once
 #include <SDL2/SDL_render.h>
+#include "video/Renderer.h"
 
-class CVideo {
+class SDLSystem {
 public:
-    CVideo();
+    SDLSystem();
 
-    virtual ~CVideo();
+    virtual ~SDLSystem();
 
-    SDL_Renderer *getRenderer();
+    Renderer *getRenderer();
 
     float getHeight();
     float getWidth();
 
-    unsigned int getPixelFormat();
-
 private:
     SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
+    Renderer *renderer = NULL;
 };

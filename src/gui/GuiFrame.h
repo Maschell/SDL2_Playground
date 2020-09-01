@@ -20,6 +20,7 @@
 #include <mutex>
 #include "GuiElement.h"
 #include "sigslot.h"
+#include "../system/video/Renderer.h"
 
 //!Allows GuiElements to be grouped together into a "window"
 class GuiFrame : public GuiElement {
@@ -33,7 +34,7 @@ public:
     GuiFrame(float w, float h, GuiFrame *parent = 0);
 
     //!Destructor
-    virtual ~GuiFrame();
+    ~GuiFrame() override;
 
     //!Appends a GuiElement to the GuiFrame
     //!\param e The GuiElement to append. If it is already in the GuiFrame, it is removed first
@@ -84,7 +85,7 @@ public:
     int32_t getSelected() override;
 
     //!Draws all the elements in this GuiFrame
-    void draw(CVideo *v) override;
+    void draw(Renderer *v) override;
 
     //!Updates the window and all elements contains within
     //!Allows the GuiFrame and all elements to respond to the input data specified
