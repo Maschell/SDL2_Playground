@@ -44,7 +44,7 @@ cat <<EOF > $outFile
 
 
 #include "Resources.h"
-#ifdef __WIIU__
+
 EOF
 
 for i in ${files[@]}
@@ -69,22 +69,6 @@ done
 echo -e '\t{NULL, NULL, 0, NULL, 0}' >> $outFile
 echo '};' >> $outFile
 echo '' >> $outFile
-echo '#else' >> $outFile
-
-echo 'static RecourceFile RecourceList[] =' >> $outFile
-echo '{' >> $outFile
-
-for i in ${files[@]}
-do
-	filename=${i%.*}
-	extension=${i##*.}
-	echo -e '\t{"'$i'", NULL, NULL, NULL, 0},' >> $outFile
-done
-
-echo -e '\t{NULL, NULL, 0, NULL, 0}' >> $outFile
-echo '};' >> $outFile
-echo '' >> $outFile
-echo '#endif' >> $outFile
 
 echo '#endif' >> $outFile
 

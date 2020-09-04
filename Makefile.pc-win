@@ -1,14 +1,14 @@
 #-------------------------------------------------------------------------------
 .SUFFIXES:
 #-------------------------------------------------------------------------------
-
 ifeq ($(strip $(MINGW64_PREFIX)),)
     $(error "Please set MINGW64_PREFIX in your environment. export MINGW64_PREFIX=<path to>/mingw64/bin/")
 endif
 
-
 CXX	:= $(MINGW64_PREFIX)g++
 C	:= $(MINGW64_PREFIX)gcc
+OBJCOPY	:= $(MINGW64_PREFIX)objcopy
+LD	:= $(MINGW64_PREFIX)ld
 PREFIX	:= $(MINGW64_PREFIX)
 
 ifeq ($(strip $(CONFIG_PREFIX)),)
@@ -16,7 +16,6 @@ ifeq ($(strip $(CONFIG_PREFIX)),)
 else 
  PKG-CONFIG := $(CONFIG_PREFIX)pkg-config
 endif
-
 
 #-------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -29,13 +28,19 @@ TARGET		:=	SDL2_Playground
 BUILD		:=	build-pc-win
 SOURCES		:=	src \
 				src/gui \
+				src/fs \
 				src/input \
 				src/menu \
+				src/resources \
 				src/system \
 				src/system/video \
 				src/utils
-DATA		:=	data
+DATA		:=	data \
+				data/images \
+				data/sounds \
+				data/fonts
 INCLUDES	:=	source
+
 
 #-------------------------------------------------------------------------------
 # options for code generation
@@ -57,7 +62,8 @@ ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-g $(ARCH)
 
 LIBS   :=   `$(PKG-CONFIG) --libs SDL2_mixer SDL2_ttf SDL2_image`
-    ifeq ($(strip $(EXTRA_LDFLAGS)),)
+
+ifeq ($(strip $(EXTRA_LDFLAGS)),)
 else 
     LDFLAGS	+= $(EXTRA_LDFLAGS)
 endif
@@ -83,6 +89,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
+FILELIST    :=    $(shell bash ./filelist.sh)
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
@@ -105,7 +112,6 @@ endif
 export OFILES_BIN	:=	$(addsuffix .o,$(BINFILES))
 export OFILES_SRC	:=	$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 export OFILES 	:=	$(OFILES_BIN) $(OFILES_SRC)
-export HFILES_BIN	:=	$(addsuffix .h,$(subst .,_,$(BINFILES)))
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
@@ -140,6 +146,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 all	:	 $(OUTPUT).exe
 
 $(OUTPUT).exe	: $(OFILES)
+
 $(OFILES_SRC)	: $(HFILES_BIN)
 
 $(OUTPUT).exe:
@@ -149,6 +156,39 @@ $(OUTPUT).exe:
 %.o: %.cpp
 	@echo "$(notdir $<)"	
 	@$(CXX) -MMD -MP -MF $(DEPSDIR)/$*.d $(CXXFLAGS)  -c $< -o $@ $(ERROR_FILTER)
+
+%.png.o %.png.h	:	%.png
+	@echo $(notdir $<)
+	@$(bin2o)
+	
+%.jpg.o %.jpg.h	:	%.jpg
+	@echo $(notdir $<)
+	@$(bin2o)
+	
+%.ogg.o %.ogg.h	:	%.ogg
+	@echo $(notdir $<)
+	@$(bin2o)
+	
+%.mp3.o %.mp3.h :	%.mp3
+	@echo $(notdir $<)
+	@$(bin2o)
+    
+%.ttf.o %.ttf.h	:	%.ttf
+	@echo $(notdir $<)
+	@$(bin2o)
+
+define bin2o
+	@$(LD) -r -b binary $< -o $(<F).o
+	@$(OBJCOPY) $(<F).o --redefine-sym _binary_`(echo $< | tr . _| tr / _)`_start=`(echo $(<F) | tr . _)`
+	@$(OBJCOPY) $(<F).o --redefine-sym _binary_`(echo $< | tr . _| tr / _)`_end=`(echo $(<F) | tr . _)`_end
+	echo "#pragma once \n\
+#include <stddef.h> \n\
+#include <stdint.h> \n\
+\n\
+extern const uint8_t `(echo $(<F) | tr . _)`[]; \n\
+extern const uint8_t `(echo $(<F) | tr . _)`_end[]; \n\
+static const size_t `(echo $(<F) | tr . _)`_size=`(stat -c %s $<)`;"  > `(echo $(<F) | tr . _)`.h
+endef
 
 -include $(DEPENDS)
 

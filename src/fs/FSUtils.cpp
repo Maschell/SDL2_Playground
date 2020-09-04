@@ -1,15 +1,14 @@
 #include <malloc.h>
-#include <cstring>
 #include <cstdio>
-#include <unistd.h>
 #include <fcntl.h>
 #include "FSUtils.h"
 #include "CFile.hpp"
 
+#include <sys/stat.h>
+
 #ifdef  WIN32
 #include "../utils/dirent.h"
 #endif
-
 
 int32_t FSUtils::LoadFileToMem(const char *filepath, uint8_t **inbuffer, uint32_t *size) {
     //! always initialze input

@@ -30,6 +30,10 @@
 #include "sigslot.h"
 #include "../system/video/Renderer.h"
 
+#ifndef M_PI
+#define M_PI		3.14159265358979323846
+#endif
+
 enum {
     EFFECT_NONE =               0x00,
     EFFECT_SLIDE_TOP =          0x01,

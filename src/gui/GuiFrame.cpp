@@ -15,8 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "GuiFrame.h"
-#include "../system/video/Renderer.h"
-#include "../utils/logger.h"
 
 GuiFrame::GuiFrame(GuiFrame *p) {
     parent = p;
@@ -52,7 +50,6 @@ void GuiFrame::append(GuiElement *e) {
     if (e == nullptr) {
         return;
     }
-    DEBUG_FUNCTION_LINE("append %08X", e);
 
     remove(e);
     mutex.lock();

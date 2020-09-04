@@ -6,3 +6,6 @@ cmake/
 *.rpx
 *.exe
 build-pc-win/
+data/images/button.png.h
+data/images/button.png.o
+src/resources/filelist.h
