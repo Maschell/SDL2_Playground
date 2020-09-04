@@ -25,28 +25,28 @@
 GuiButton::GuiButton(float w, float h) {
     width = w;
     height = h;
-    image = NULL;
-    imageOver = NULL;
-    imageHold = NULL;
-    imageClick = NULL;
-    icon = NULL;
-    iconOver = NULL;
+    image = nullptr;
+    imageOver = nullptr;
+    imageHold = nullptr;
+    imageClick = nullptr;
+    icon = nullptr;
+    iconOver = nullptr;
 
     for (int32_t i = 0; i < 4; i++) {
-        label[i] = NULL;
-        labelOver[i] = NULL;
-        labelHold[i] = NULL;
-        labelClick[i] = NULL;
+        label[i] = nullptr;
+        labelOver[i] = nullptr;
+        labelHold[i] = nullptr;
+        labelClick[i] = nullptr;
     }
-    for (int32_t i = 0; i < iMaxGuiTriggers; i++) {
-        trigger[i] = NULL;
+    for (auto &i : trigger) {
+        i = nullptr;
     }
 
-    soundOver = NULL;
-    soundHold = NULL;
-    soundClick = NULL;
-    clickedTrigger = NULL;
-    heldTrigger = NULL;
+    soundOver = nullptr;
+    soundHold = nullptr;
+    soundClick = nullptr;
+    clickedTrigger = nullptr;
+    heldTrigger = nullptr;
     selectable = true;
     holdable = false;
     clickable = true;
@@ -55,8 +55,7 @@ GuiButton::GuiButton(float w, float h) {
 /**
  * Destructor for the GuiButton class.
  */
-GuiButton::~GuiButton() {
-}
+GuiButton::~GuiButton() = default;
 
 void GuiButton::setImage(GuiImage *img) {
     image = img;
@@ -124,9 +123,9 @@ void GuiButton::setTrigger(GuiTrigger *t, int32_t idx) {
     if (idx >= 0 && idx < iMaxGuiTriggers) {
         trigger[idx] = t;
     } else {
-        for (int32_t i = 0; i < iMaxGuiTriggers; i++) {
-            if (!trigger[i]) {
-                trigger[i] = t;
+        for (auto &i : trigger) {
+            if (!i) {
+                i = t;
                 break;
             }
         }
@@ -134,8 +133,8 @@ void GuiButton::setTrigger(GuiTrigger *t, int32_t idx) {
 }
 
 void GuiButton::resetState() {
-    clickedTrigger = NULL;
-    heldTrigger = NULL;
+    clickedTrigger = nullptr;
+    heldTrigger = nullptr;
     GuiElement::resetState();
 }
 
@@ -213,21 +212,21 @@ void GuiButton::update(GuiController *c) {
         }
     }
 
-    for (int32_t i = 0; i < iMaxGuiTriggers; i++) {
-        if (!trigger[i]) {
+    for (auto & i : trigger) {
+        if (!i) {
             continue;
         }
 
         // button triggers
         if (clickable) {
-            int32_t isClicked = trigger[i]->clicked(c);
+            int32_t isClicked = i->clicked(c);
             if (!clickedTrigger && (isClicked != GuiTrigger::CLICKED_NONE)
-                && (trigger[i]->isClickEverywhere() || (isStateSet(STATE_SELECTED | STATE_OVER, c->chanIdx) && trigger[i]->isSelectionClickEverywhere()) || this->isInside(c->data.x, c->data.y))) {
+                && (i->isClickEverywhere() || (isStateSet(STATE_SELECTED | STATE_OVER, c->chanIdx) && i->isSelectionClickEverywhere()) || this->isInside(c->data.x, c->data.y))) {
                 if (soundClick) {
                     soundClick->Play();
                 }
 
-                clickedTrigger = trigger[i];
+                clickedTrigger = i;
 
                 if (!isStateSet(STATE_CLICKED, c->chanIdx)) {
                     if (isClicked == GuiTrigger::CLICKED_TOUCH) {
@@ -237,38 +236,38 @@ void GuiButton::update(GuiController *c) {
                     }
                 }
 
-                clicked(this, c, trigger[i]);
-            } else if ((isStateSet(STATE_CLICKED, c->chanIdx) || isStateSet(STATE_CLICKED_TOUCH, c->chanIdx)) && (clickedTrigger == trigger[i]) && !isStateSet(STATE_HELD, c->chanIdx) && !trigger[i]->held(c) &&
-                       ((isClicked == GuiTrigger::CLICKED_NONE) || trigger[i]->released(c))) {
+                clicked(this, c, i);
+            } else if ((isStateSet(STATE_CLICKED, c->chanIdx) || isStateSet(STATE_CLICKED_TOUCH, c->chanIdx)) && (clickedTrigger == i) && !isStateSet(STATE_HELD, c->chanIdx) && !i->held(c) &&
+                       ((isClicked == GuiTrigger::CLICKED_NONE) || i->released(c))) {
                 if ((isStateSet(STATE_CLICKED_TOUCH, c->chanIdx) && this->isInside(c->data.x, c->data.y)) || (isStateSet(STATE_CLICKED, c->chanIdx))) {
                     clickedTrigger = nullptr;
                     clearState(STATE_CLICKED, c->chanIdx);
-                    released(this, c, trigger[i]);
+                    released(this, c, i);
                 }
             }
         }
 
         if (holdable) {
-            bool isHeld = trigger[i]->held(c);
+            bool isHeld = i->held(c);
 
-            if ((!heldTrigger || heldTrigger == trigger[i]) && isHeld
-                && (trigger[i]->isHoldEverywhere() || (isStateSet(STATE_SELECTED | STATE_OVER, c->chanIdx) && trigger[i]->isSelectionClickEverywhere()) || this->isInside(c->data.x, c->data.y))) {
-                heldTrigger = trigger[i];
+            if ((!heldTrigger || heldTrigger == i) && isHeld
+                && (i->isHoldEverywhere() || (isStateSet(STATE_SELECTED | STATE_OVER, c->chanIdx) && i->isSelectionClickEverywhere()) || this->isInside(c->data.x, c->data.y))) {
+                heldTrigger = i;
 
                 if (!isStateSet(STATE_HELD, c->chanIdx)) {
                     setState(STATE_HELD, c->chanIdx);
                 }
 
-                held(this, c, trigger[i]);
-            } else if (isStateSet(STATE_HELD, c->chanIdx) && (heldTrigger == trigger[i]) && (!isHeld || trigger[i]->released(c))) {
+                held(this, c, i);
+            } else if (isStateSet(STATE_HELD, c->chanIdx) && (heldTrigger == i) && (!isHeld || i->released(c))) {
                 //! click is removed at this point and converted to held
-                if (clickedTrigger == trigger[i]) {
+                if (clickedTrigger == i) {
                     clickedTrigger = nullptr;
                     clearState(STATE_CLICKED, c->chanIdx);
                 }
                 heldTrigger = nullptr;
                 clearState(STATE_HELD, c->chanIdx);
-                released(this, c, trigger[i]);
+                released(this, c, i);
             }
         }
     }

@@ -26,16 +26,12 @@ GuiText::GuiText(const std::string& text, SDL_Color c, FC_Font* gFont) {
    this->text = text;
    this->color = c;
    this->fc_font = gFont;
-   updateSize();
    this->doUpdateTexture = true;
+   this->texture.setParent(this);
 }
 
-GuiText::~GuiText(){
-    if(fc_font){
-        FC_FreeFont(fc_font);
-        fc_font = nullptr;
-    }
-    delete texture;
+GuiText::~GuiText() {
+    delete textureData;
 }
 
 void GuiText::draw(Renderer *renderer) {
@@ -45,9 +41,7 @@ void GuiText::draw(Renderer *renderer) {
 
     updateTexture(renderer);
 
-    if(texture){
-        texture->draw(renderer);
-    }
+    texture.draw(renderer);
 }
 
 void GuiText::process() {
@@ -57,7 +51,7 @@ void GuiText::process() {
 void GuiText::setMaxWidth(float width) {
     this->maxWidth = width;
 
-    // Rebuild the texture cache.
+    // Rebuild the texture cache on next draw
     doUpdateTexture = true;
 }
 
@@ -69,20 +63,23 @@ void GuiText::updateSize() {
 }
 
 void GuiText::updateTexture(Renderer *renderer) {
-    if(!texture || doUpdateTexture) {
+    if(doUpdateTexture) {
         updateSize();
+        int tex_width = tex_width = width == 0 ? 1 : (int) width;
+        int tex_height = tex_height = height == 0 ? 1 : (int)height;
 
-        SDL_Texture *temp = SDL_CreateTexture(renderer->getRenderer(), renderer->getPixelFormat(), SDL_TEXTUREACCESS_TARGET, (int) width, (int) height);
+        SDL_Texture *temp = SDL_CreateTexture(renderer->getRenderer(), renderer->getPixelFormat(), SDL_TEXTUREACCESS_TARGET, tex_width, tex_height);
         if (temp) {
-            delete texture;
-            texture = new GuiTexture(temp);
-            texture->setParent(this);
-            texture->setBlendMode(SDL_BLENDMODE_BLEND);
+            texture.setTexture(nullptr);
+            delete textureData;
+            textureData = new GuiTextureData(temp);
+            textureData->setBlendMode(SDL_BLENDMODE_BLEND);
+            texture.setTexture(textureData);
 
             FC_DrawColumnToTexture(fc_font, temp, 0, 0, maxWidth, text.c_str());
-            doUpdateTexture = false;
         } else {
             DEBUG_FUNCTION_LINE("Failed to create texture");
         }
+        doUpdateTexture = false;
     }
 }

@@ -9,6 +9,7 @@
 
 #endif
 #include <string.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

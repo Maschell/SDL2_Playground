@@ -14,10 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
-#include <iostream>
-#include "GuiElement.h"
 #include "GuiController.h"
-#include "GuiTrigger.h"
 
 /**
  * Constructor for the GuiTrigger class.
@@ -33,8 +30,7 @@ GuiTrigger::GuiTrigger(uint32_t ch, uint32_t btn, bool clickEverywhere, bool hol
 /**
  * Destructor for the GuiTrigger class.
  */
-GuiTrigger::~GuiTrigger() {
-}
+GuiTrigger::~GuiTrigger() = default;
 
 /**
  * Sets a simple trigger. Requires:
@@ -92,6 +88,7 @@ int32_t GuiTrigger::clicked(const GuiController *controller) const {
     }
 
     int32_t bResult = CLICKED_NONE;
+
 
     if (controller->data.touched && controller->data.validPointer && (btns & TOUCHED) && !controller->lastData.touched) {
         bResult = CLICKED_TOUCH;

@@ -4,6 +4,7 @@
 #include "../gui/GuiFrame.h"
 #include "../gui/GuiButton.h"
 #include "../utils/logger.h"
+#include "../gui/GuiImage.h"
 
 class MainWindow : public GuiFrame, public sigslot::has_slots<> {
 public:
@@ -16,6 +17,7 @@ public:
 private:
     GuiText *label = nullptr;
     GuiTrigger *touchTrigger = nullptr;
+    GuiTrigger *buttonTrigger = nullptr;
     GuiSound *sound = nullptr;
     GuiImage *image = nullptr;
     GuiImage *image2 = nullptr;

@@ -18,15 +18,24 @@
 
 #include <SDL2/SDL_render.h>
 #include "GuiElement.h"
-#include "GuiTexture.h"
+#include "GuiTextureData.h"
 
 //!Display, manage, and manipulate images in the GUI
-class GuiImage : public GuiTexture {
+class GuiImage : public GuiElement {
 public:
     //!\overload
     //!\param img Pointer to GuiImageData element
-    explicit GuiImage(const std::string &path);
+    GuiImage() = default;
+
+    explicit GuiImage(GuiTextureData *texture);
 
     //!Destructor
     ~GuiImage() override;
+
+    void draw(Renderer *r) override;
+
+    void setTexture(GuiTextureData *tex);
+private:
+    GuiTextureData *texture = nullptr;
+    bool freeTextureData = false;
 };

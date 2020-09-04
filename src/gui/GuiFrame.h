@@ -76,9 +76,9 @@ public:
 
     //!Sets the window's state
     //!\param s State
-    void setState(int32_t s, int32_t c = -1) override;
+    void setState(uint32_t s, int32_t c = -1) override;
 
-    void clearState(int32_t s, int32_t c = -1) override;
+    void clearState(uint32_t s, int32_t c = -1) override;
 
     //!Gets the index of the GuiElement inside the window that is currently selected
     //!\return index of selected GuiElement

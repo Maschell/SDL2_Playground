@@ -33,11 +33,11 @@ GuiElement::GuiElement() {
     scaleX = 1.0f;
     scaleY = 1.0f;
     scaleZ = 1.0f;
-    for (int32_t i = 0; i < 5; i++) {
-        state[i] = STATE_DEFAULT;
+    for (unsigned int & i : state) {
+        i = STATE_DEFAULT;
     }
     stateChan = -1;
-    parentElement = NULL;
+    parentElement = nullptr;
     rumble = true;
     selectable = false;
     clickable = false;
@@ -120,7 +120,7 @@ float GuiElement::getTop() {
     return y + yoffset;
 }
 
-void GuiElement::setEffect(int32_t eff, int32_t amount, int32_t target) {
+void GuiElement::setEffect(uint32_t eff, int32_t amount, int32_t target) {
     if (eff & EFFECT_SLIDE_IN) {
         // these calculations overcompensate a little
         if (eff & EFFECT_SLIDE_TOP) {
@@ -163,7 +163,7 @@ void GuiElement::setEffect(int32_t eff, int32_t amount, int32_t target) {
 //!\param e Effect to enable
 //!\param a Amount of the effect (usage varies on effect)
 //!\param t Target amount of the effect (usage varies on effect)
-void GuiElement::setEffectOnOver(int32_t e, int32_t a, int32_t t) {
+void GuiElement::setEffectOnOver(uint32_t e, int32_t a, int32_t t) {
     effectsOver |= e;
     effectAmountOver = a;
     effectTargetOver = t;

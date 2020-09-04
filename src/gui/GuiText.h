@@ -17,8 +17,9 @@
 #pragma once
 
 #include "GuiElement.h"
-#include "GuiTexture.h"
+#include "GuiTextureData.h"
 #include "../system/video/SDL_FontCache.h"
+#include "GuiImage.h"
 #include <mutex>
 #include <SDL2/SDL_ttf.h>
 
@@ -39,7 +40,9 @@ public:
     void setMaxWidth(float width);
 
 protected:
-    GuiTexture* texture = nullptr;
+    GuiImage texture;
+    GuiTextureData* textureData = nullptr;
+
     std::string text;
     SDL_Color color;
     FC_Font *fc_font = nullptr;

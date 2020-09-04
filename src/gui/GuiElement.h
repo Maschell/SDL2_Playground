@@ -69,7 +69,7 @@ public:
     GuiElement();
 
     //!Destructor
-    virtual ~GuiElement() {}
+    virtual ~GuiElement() = default;
 
     //!Set the element's parent
     //!\param e Pointer to parent element
@@ -105,7 +105,7 @@ public:
         return zParent + zoffset;
     }
 
-    virtual float getCenterX(void) {
+    virtual float getCenterX() {
         float pCenterX = 0.0f;
 
         if (parentElement) {
@@ -138,7 +138,7 @@ public:
         return pCenterX;
     }
 
-    virtual float getCenterY(void) {
+    virtual float getCenterY() {
         float pCenterY = 0.0f;
 
         if (parentElement) {
@@ -261,7 +261,7 @@ public:
     //!Sets the element's state
     //!\param s State (STATE_DEFAULT, STATE_SELECTED, STATE_CLICKED, STATE_DISABLED)
     //!\param c Controller channel (0-3, -1 = none)
-    virtual void setState(int32_t s, int32_t c = -1) {
+    virtual void setState(uint32_t s, int32_t c) {
         if (c >= 0 && c < 5) {
             state[c] |= s;
         } else {
@@ -273,24 +273,24 @@ public:
         stateChanged(this, s, c);
     }
 
-    virtual void clearState(int32_t s, int32_t c = -1) {
+    virtual void clearState(uint32_t s, int32_t c) {
         if (c >= 0 && c < 5) {
             state[c] &= ~s;
         } else {
-            for (int32_t i = 0; i < 5; i++) {
-                state[i] &= ~s;
+            for (unsigned int & i : state) {
+                i &= ~s;
             }
         }
         stateChan = c;
         stateChanged(this, s, c);
     }
 
-    virtual bool isStateSet(int32_t s, int32_t c = -1) const {
+    virtual bool isStateSet(uint32_t s, int32_t c = -1) const {
         if (c >= 0 && c < 5) {
             return (state[c] & s) != 0;
         } else {
-            for (int32_t i = 0; i < 5; i++) {
-                if ((state[i] & s) != 0) {
+            for (unsigned int i : state) {
+                if ((i & s) != 0) {
                     return true;
                 }
             }
@@ -301,7 +301,7 @@ public:
 
     //!Gets the element's current state
     //!\return state
-    virtual int32_t getState(int32_t c = 0) {
+    virtual int32_t getState(int32_t c) {
         return state[c];
     };
 
@@ -313,8 +313,8 @@ public:
 
     //!Resets the element's state to STATE_DEFAULT
     virtual void resetState() {
-        for (int32_t i = 0; i < 5; i++) {
-            state[i] = STATE_DEFAULT;
+        for (unsigned int & i : state) {
+            i = STATE_DEFAULT;
         }
         stateChan = -1;
     }
@@ -434,13 +434,13 @@ public:
     //!\param e Effect to enable
     //!\param a Amount of the effect (usage varies on effect)
     //!\param t Target amount of the effect (usage varies on effect)
-    virtual void setEffect(int32_t e, int32_t a, int32_t t = 0);
+    virtual void setEffect(uint32_t e, int32_t a, int32_t t);
 
     //!Sets an effect to be enabled on wiimote cursor over
     //!\param e Effect to enable
     //!\param a Amount of the effect (usage varies on effect)
     //!\param t Target amount of the effect (usage varies on effect)
-    virtual void setEffectOnOver(int32_t e, int32_t a, int32_t t = 0);
+    virtual void setEffectOnOver(uint32_t e, int32_t a, int32_t t);
 
     //!Shortcut to SetEffectOnOver(EFFECT_SCALE, 4, 110)
     virtual void setEffectGrow() {
@@ -466,10 +466,30 @@ public:
     //!\param y Y coordinate
     //!\return true if contained within, false otherwise
     virtual bool isInside(float x, float y) {
-       return (x > (this->getCenterX() - getScaleX() * getWidth() * 0.5f)
-                && x < (this->getCenterX() + getScaleX() * getWidth() * 0.5f)
-                && y > (this->getCenterY() - getScaleY() * getHeight() * 0.5f)
-                && y < (this->getCenterY() + getScaleY() * getHeight() * 0.5f));
+        float rotatedX = x;
+        float rotatedY = y;
+
+        if (getAngle() != 0.f) {
+            // translate input point
+            float tempX = x - getCenterX();
+            float tempY = y - getCenterY();
+
+            // Conver to Rad
+            auto angleInRad = (float) ((getAngle() * -1.0f) * M_PI / 180.0f);
+
+            // now apply rotation
+            rotatedX = tempX * cos((angleInRad)) - tempY * sin(angleInRad);
+            rotatedY = tempX * sin(angleInRad) + tempY * cos(angleInRad);
+
+            // translate back
+            rotatedX = rotatedX + getCenterX();
+            rotatedY = rotatedY + getCenterY();
+        }
+
+       return (rotatedX > (this->getCenterX() - getScaleX() * getWidth() * 0.5f)
+                && rotatedX < (this->getCenterX() + getScaleX() * getWidth() * 0.5f)
+                && rotatedY > (this->getCenterY() - getScaleY() * getHeight() * 0.5f)
+                && rotatedY < (this->getCenterY() + getScaleY() * getHeight() * 0.5f));
     }
 
     //!Sets the element's position
@@ -586,8 +606,8 @@ protected:
     float scaleX; //!< Element scale (1 = 100%)
     float scaleY; //!< Element scale (1 = 100%)
     float scaleZ; //!< Element scale (1 = 100%)
-    int32_t alignment; //!< Horizontal element alignment, respective to parent element
-    int32_t state[5]; //!< Element state (DEFAULT, SELECTED, CLICKED, DISABLED)
+    uint32_t alignment; //!< Horizontal element alignment, respective to parent element
+    uint32_t state[5]{}; //!< Element state (DEFAULT, SELECTED, CLICKED, DISABLED)
     int32_t stateChan; //!< Which controller channel is responsible for the last change in state
     GuiElement *parentElement; //!< Parent element
 
@@ -596,10 +616,10 @@ protected:
     int32_t yoffsetDyn; //!< Element Y offset, dynamic (added to yoffset value for animation effects)
     float alphaDyn; //!< Element alpha, dynamic (multiplied by alpha value for blending/fading effects)
     float scaleDyn; //!< Element scale, dynamic (multiplied by alpha value for blending/fading effects)
-    int32_t effects; //!< Currently enabled effect(s). 0 when no effects are enabled
+    uint32_t effects; //!< Currently enabled effect(s). 0 when no effects are enabled
     int32_t effectAmount; //!< Effect amount. Used by different effects for different purposes
     int32_t effectTarget; //!< Effect target amount. Used by different effects for different purposes
-    int32_t effectsOver; //!< Effects to enable when wiimote cursor is over this element. Copied to effects variable on over event
+    uint32_t effectsOver; //!< Effects to enable when wiimote cursor is over this element. Copied to effects variable on over event
     int32_t effectAmountOver; //!< EffectAmount to set when wiimote cursor is over this element
     int32_t effectTargetOver; //!< EffectTarget to set when wiimote cursor is over this element
 };

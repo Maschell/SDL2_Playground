@@ -15,64 +15,65 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include "GuiSound.h"
-#include "../utils/logger.h"
+
+GuiSound::GuiSound(void *buffer, uint32_t filesize, bool freeSrc) {
+    SDL_RWops *rw = SDL_RWFromMem(buffer, filesize);
+    music = Mix_LoadWAV_RW(rw, freeSrc);
+}
 
 GuiSound::GuiSound(const char *filepath) {
     Load(filepath);
 }
 
 GuiSound::~GuiSound() {
-    if(music){
+    if (music) {
         Mix_FreeChunk(music);
+        music = nullptr;
     }
 }
 
-
 bool GuiSound::Load(const char *filepath) {
     music = Mix_LoadWAV(filepath);
-    DEBUG_FUNCTION_LINE("load %s %d", filepath, music);
     return music != nullptr;
 }
 
-
-
 void GuiSound::Play() {
-    playedOn = Mix_PlayChannel(-1,music, loops);
+    if (music) {
+        playedOn = Mix_PlayChannel(-1, music, loops);
+    }
 }
 
-void GuiSound::Stop() {
+void GuiSound::Stop() const {
     Pause();
 }
 
-void GuiSound::Pause() {
-    Mix_HaltChannel(playedOn);
+void GuiSound::Pause() const {
+    if (playedOn != -1) {
+        Mix_HaltChannel(playedOn);
+    }
 }
 
 void GuiSound::Resume() {
     Play();
 }
 
-bool GuiSound::IsPlaying() {
-    if(playedOn == -1){
+bool GuiSound::IsPlaying() const {
+    if (playedOn == -1) {
         return false;
     }
     return Mix_Playing(playedOn);
 }
 
-void GuiSound::SetVolume(uint32_t vol) {
-    if(music != nullptr){
-        Mix_VolumeChunk(music, vol);
-    }
+void GuiSound::SetVolume(uint32_t vol) const {
+    if (music) { Mix_VolumeChunk(music, vol); }
 }
 
 void GuiSound::SetLoop(bool l) {
-    if(l){
-        loops = -1;
-    }else{
-        loops = 1;
-    }
+    // < 0 == infinitive loop
+    loops = l ? -1 : 1;
 }
 
-void GuiSound::Rewind() {
+void GuiSound::Rewind() const {
+    // TODO: how to rewind?
     Stop();
 }

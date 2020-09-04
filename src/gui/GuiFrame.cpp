@@ -16,6 +16,7 @@
  ****************************************************************************/
 #include "GuiFrame.h"
 #include "../system/video/Renderer.h"
+#include "../utils/logger.h"
 
 GuiFrame::GuiFrame(GuiFrame *p) {
     parent = p;
@@ -48,9 +49,10 @@ GuiFrame::~GuiFrame() {
 }
 
 void GuiFrame::append(GuiElement *e) {
-    if (e == NULL) {
+    if (e == nullptr) {
         return;
     }
+    DEBUG_FUNCTION_LINE("append %08X", e);
 
     remove(e);
     mutex.lock();
@@ -60,7 +62,7 @@ void GuiFrame::append(GuiElement *e) {
 }
 
 void GuiFrame::insert(GuiElement *e, uint32_t index) {
-    if (e == NULL || (index >= elements.size())) {
+    if (e == nullptr || (index >= elements.size())) {
         return;
     }
 
@@ -94,7 +96,7 @@ void GuiFrame::removeAll() {
 
 GuiElement *GuiFrame::getGuiElementAt(uint32_t index) const {
     if (index >= elements.size()) {
-        return NULL;
+        return nullptr;
     }
 
     return elements[index];
@@ -108,13 +110,13 @@ void GuiFrame::resetState() {
     GuiElement::resetState();
 
     mutex.lock();
-    for (uint32_t i = 0; i < elements.size(); ++i) {
-        elements[i]->resetState();
+    for (auto & element : elements) {
+        element->resetState();
     }
     mutex.unlock();
 }
 
-void GuiFrame::setState(int32_t s, int32_t c) {
+void GuiFrame::setState(uint32_t s, int32_t c) {
     GuiElement::setState(s, c);
     mutex.lock();
     for (uint32_t i = 0; i < elements.size(); ++i) {
@@ -123,7 +125,7 @@ void GuiFrame::setState(int32_t s, int32_t c) {
     mutex.unlock();
 }
 
-void GuiFrame::clearState(int32_t s, int32_t c) {
+void GuiFrame::clearState(uint32_t s, int32_t c) {
     GuiElement::clearState(s, c);
 
     mutex.lock();
@@ -137,8 +139,8 @@ void GuiFrame::setVisible(bool v) {
     visible = v;
 
     mutex.lock();
-    for (uint32_t i = 0; i < elements.size(); ++i) {
-        elements[i]->setVisible(v);
+    for (auto & element : elements) {
+        element->setVisible(v);
     }
     mutex.unlock();
 }

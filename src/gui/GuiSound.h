@@ -22,10 +22,12 @@
 //!Sound conversion and playback. A wrapper for other sound libraries - ASND, libmad, ltremor, etc
 class GuiSound : public GuiElement {
 public:
+    explicit GuiSound(const char *filepath);
+
     //!Constructor
     //!\param sound Pointer to the sound data
     //!\param filesize Length of sound data
-    explicit GuiSound(const char *filepath);
+    GuiSound(void *buffer, uint32_t filesize, bool freeSrc = false);
 
     //!Destructor
     ~GuiSound() override;
@@ -37,29 +39,29 @@ public:
     void Play();
 
     //!Stop sound playback
-    void Stop();
+    void Stop() const;
 
     //!Pause sound playback
-    void Pause();
+    void Pause() const;
 
     //!Resume sound playback
     void Resume();
 
     //!Checks if the sound is currently playing
     //!\return true if sound is playing, false otherwise
-    bool IsPlaying();
+    [[nodiscard]] bool IsPlaying() const;
 
     //!Rewind the music
-    void Rewind();
+    void Rewind() const;
 
     //!Set sound volume
     //!\param v Sound volume (0-100)
-    void SetVolume(uint32_t v);
+    void SetVolume(uint32_t v) const;
 
     //!\param l Loop (true to loop)
     void SetLoop(bool l);
 
-    Mix_Chunk *music;
+    Mix_Chunk *music = nullptr;
     int32_t loops = 0;
     int32_t playedOn = -1;
 };

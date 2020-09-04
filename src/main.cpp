@@ -1,23 +1,16 @@
 #include <SDL2/SDL.h>
 #include "system/SDLSystem.h"
 #include "gui/GuiFrame.h"
-#include "gui/GuiImage.h"
 #include "gui/GuiButton.h"
 #include "gui/GuiController.h"
 #include "menu/MainWindow.h"
-#include "utils/logger.h"
 #include "input/SDLController.h"
 #include "input/SDLControllerMouse.h"
-#include "input/SDLControllerWiiUGamepad.h"
-#include "input/SDLControllerXboxOne.h"
-#include "input/SDLControllerWiiUProContoller.h"
-#include "input/SDLControllerJoystick.h"
 #include "input/ControllerManager.h"
 
 #include <cstdio>
 #include <fcntl.h>
 
-#include <map>
 
 #if defined _WIN32
 #include <windows.h>

@@ -20,7 +20,7 @@
 
 class GuiController;
 
-//!Menu input trigger management. Determine if action is neccessary based on input data by comparing controller input data to a specific trigger element.
+//!Menu input trigger management. Determine if action is necessary based on input data by comparing controller input data to a specific trigger element.
 class GuiTrigger {
 public:
     enum eClicked {
@@ -96,15 +96,15 @@ public:
         bSelectionClickEverywhere = b;
     }
 
-    bool isClickEverywhere() const {
+    [[nodiscard]] bool isClickEverywhere() const {
         return bClickEverywhere;
     }
 
-    bool isHoldEverywhere() const {
+    [[nodiscard]] bool isHoldEverywhere() const {
         return bHoldEverywhere;
     }
 
-    bool isSelectionClickEverywhere() const {
+    [[nodiscard]] bool isSelectionClickEverywhere() const {
         return bSelectionClickEverywhere;
     }
 

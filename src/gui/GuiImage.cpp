@@ -15,11 +15,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 #include <SDL2/SDL_image.h>
-#include <iostream>
 #include "GuiImage.h"
-#include "../system/SDLSystem.h"
+#include "../utils/logger.h"
 
-GuiImage::GuiImage(const std::string& path) : GuiTexture(path){
+GuiImage::GuiImage(GuiTextureData *texture) {
+    setTexture(texture);
 }
 
-GuiImage::~GuiImage() = default;
+GuiImage::~GuiImage() {
+    if(this->texture && freeTextureData){
+        delete this->texture;
+    }
+}
+
+void GuiImage::draw(Renderer *renderer) {
+    if (!this->isVisible()) {
+        return;
+    }
+
+    if (texture) {
+        SDL_Rect rect;
+        rect.x = (int) getLeft();
+        rect.y = (int) getTop();
+        rect.w = (int) (getScaleX() * getWidth());
+        rect.h = (int) (getScaleY() * getHeight());
+        texture->draw(renderer, rect, getAngle());
+    }
+}
+
+void GuiImage::setTexture(GuiTextureData *tex) {
+    if (tex) {
+        if(this->texture && freeTextureData){
+            delete this->texture;
+        }
+        this->texture = tex;
+        this->setSize(tex->getWidth(), tex->getHeight());
+    }
+}

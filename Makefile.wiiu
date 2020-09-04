@@ -22,12 +22,17 @@ TARGET		:=	SDL2_Playground
 BUILD		:=	build
 SOURCES		:=	src \
 				src/gui \
+				src/fs \
 				src/input \
 				src/menu \
+				src/resources \
 				src/system \
 				src/system/video \
 				src/utils
-DATA		:=	data
+DATA		:=	data \
+				data/images \
+				data/sounds \
+				data/fonts
 INCLUDES	:=	source
 
 #-------------------------------------------------------------------------------
@@ -45,13 +50,11 @@ LDFLAGS	=	-g $(ARCH) $(RPXSPECS) -Wl,-Map,$(notdir $*.map)
 
 LIBS   :=   `$(PREFIX)pkg-config --libs SDL2_mixer SDL2_ttf SDL2_image`
 
-
 #-------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level
 # containing include and lib
 #-------------------------------------------------------------------------------
 LIBDIRS	:= $(PORTLIBS) $(WUT_ROOT) $(WUMS_ROOT)
-
 
 #-------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -68,6 +71,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
+FILELIST	:=	$(shell bash ./filelist.sh)
 CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
@@ -137,6 +141,26 @@ $(OFILES_SRC)	: $(HFILES_BIN)
 #-------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
+
+%.png.o	%_png.h :	%.png
+	@echo $(notdir $<)
+	@$(bin2o)
+	
+%.jpg.o	%_jpg.h :	%.jpg
+	@echo $(notdir $<)
+	@$(bin2o)
+	
+%.ogg.o	%_ogg.h :	%.ogg
+	@echo $(notdir $<)
+	@$(bin2o)	
+	
+%.mp3.o	%_mp3.h :	%.mp3
+	@echo $(notdir $<)
+	@$(bin2o)	
+	
+%.ttf.o	%_ttf.h :	%.ttf
+	@echo $(notdir $<)
+	@$(bin2o)	
 
 #---------------------------------------------------------------------------------
 %.o: %.s

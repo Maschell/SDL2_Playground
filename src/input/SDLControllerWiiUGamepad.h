@@ -26,16 +26,14 @@ public:
     }
 
     bool update(SDL_Event *e, int32_t screenWidth, int32_t screenHeight) override {
-        if (e->type == SDL_FINGERMOTION) {
+        if (e->type == SDL_FINGERMOTION || e->type == SDL_FINGERUP || e->type == SDL_FINGERDOWN) {
             data.y = e->tfinger.y * screenHeight;
-            data.x = e->tfinger.x * screenWidth;;
-            data.validPointer = true;
-        } else if (e->type == SDL_FINGERUP) {
-            data.validPointer = false;
-            data.buttons_h &= ~GuiTrigger::TOUCHED;
-        } else if (e->type == SDL_FINGERDOWN) {
-            data.validPointer = true;
-            data.buttons_h |= GuiTrigger::TOUCHED;
+            data.x = e->tfinger.x * screenWidth;
+            if (e->type == SDL_FINGERUP) {
+                data.touched = false;
+            } else if (e->type == SDL_FINGERDOWN) {
+                data.touched = true;
+            }
         } else if (e->type == SDL_JOYBUTTONDOWN) {
             data.buttons_h |= vpad_button_map[e->jbutton.button];
         } else if (e->type == SDL_JOYBUTTONUP) {
@@ -45,6 +43,11 @@ public:
             return false;
         }
         return true;
+    }
+
+    void after() override {
+        data.validPointer = data.touched;
+        SDLController::after();
     }
 };
 

@@ -61,7 +61,7 @@ public:
         int32_t y;
     } PadData;
 
-    int32_t chan;
+    uint32_t chan;
     int32_t chanIdx;
     PadData data;
     PadData lastData;
