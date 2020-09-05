@@ -75,7 +75,8 @@ int main(int argc, char *args[]) {
     auto * controllerM = new ControllerManager(system->getWidth(), system->getHeight());
 
 
-#if defined _WIN32
+#ifndef __WIIU__
+    // On non-Wii-U devices we expect a mouse.
     controllerM->attachController(GuiTrigger::CHANNEL_1, new SDLControllerMouse(GuiTrigger::CHANNEL_1));
     DEBUG_FUNCTION_LINE("Added mouse");
 #endif

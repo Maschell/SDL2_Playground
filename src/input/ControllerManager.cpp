@@ -85,7 +85,7 @@ void ControllerManager::processEvent(SDL_JoystickID joystickId, int32_t channel,
             channel = joystickToChannel[joystickId];
         }
     }
-    if (channel != -1 && controllerList.contains(static_cast<const GuiTrigger::eChannels>(channel))) {
+    if (channel != -1 && controllerList.count(static_cast<const GuiTrigger::eChannels>(channel)) > 0) {
         controllerList[static_cast<GuiTrigger::eChannels>(channel)]->update(e, screenWidth, screenHeight);
     }
 }
