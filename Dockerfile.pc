@@ -1,8 +1,6 @@
 FROM debian:sid-slim
-RUN DEBIAN_FRONTEND="noninteractive"
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends apt-utils ca-certificates && \
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils ca-certificates && \
     apt-get install -y --no-install-recommends build-essential make git && \
     apt-get install -y --no-install-recommends cmake && \
     apt-get install -y --no-install-recommends libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-dev && \

@@ -1,0 +1,34 @@
+name: Building binaries.
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-windows-binary:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: build binary
+      run: |
+        docker build . -f Dockerfile.pc-win  -t sdl2_playground-builder-pc-win
+        docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc-win make -f Makefile.pc-win
+    - uses: actions/upload-artifact@master
+      with:
+       name: windows-x64-shared 
+       path: "*.exe"
+  build-linux-x86-64-binary:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: build binary
+      run: |
+        docker build . -f Dockerfile.pc  -t sdl2_playground-builder-pc
+        docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc bash -c "cd .. && bash filelist.sh"
+        docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc cmake ..
+        docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc make
+    - uses: actions/upload-artifact@master
+      with:
+       name: linux-x86-64-shared
+       path: "./cmake-build/SDL2_Playground"
