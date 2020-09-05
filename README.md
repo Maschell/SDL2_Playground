@@ -9,6 +9,23 @@ bash ./filelist.sh
 mkdir build && cd build && cmake .. && make
 ```
 
+Via docker: 
+```
+# Build the docker image
+docker build . -f .\Dockerfile.pc  -t sdl2_playground-builder-pc
+
+# Build filelist.h
+docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc bash -c "cd .. && bash filelist.sh"
+
+# Generate the makefile
+docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc cmake ..
+
+# build!
+docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc make
+
+# The result will be in ${PWD}/cmake-build
+```
+
 ## Windows binaries
 
 ### Windows with devkitPros version of msys2

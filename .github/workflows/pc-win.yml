@@ -14,5 +14,5 @@ jobs:
         docker run --rm -v ${PWD}:/project sdl2_playground-builder-pc-win make -f Makefile.pc-win
     - uses: actions/upload-artifact@master
       with:
-       name: binary
+       name: windows-shared binary
        path: "*.exe"

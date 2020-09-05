@@ -1,0 +1,20 @@
+name: linux-x86-64 building.
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-binary:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: build binary
+      run: |
+        docker build . -f Dockerfile.pc  -t sdl2_playground-builder-pc
+        docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc bash -c "cd .. && bash filelist.sh"
+        docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc cmake ..
+        docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc make
+    - uses: actions/upload-artifact@master
+      with:
+       name: linux-x86-64-shared binary
+       path: "./cmake-build/SDL2_Playground"

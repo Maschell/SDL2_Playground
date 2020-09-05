@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 #
 # Automatic resource file list generation
 # Created by Dimok
