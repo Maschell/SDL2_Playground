@@ -18,9 +18,6 @@ MainWindow::~MainWindow() {
 }
 
 MainWindow::MainWindow(int32_t w, int32_t h, Renderer* renderer) : GuiFrame(w, h) {
-#if defined _WIN32
-    Resources::LoadFiles(".");
-#endif
     auto picture_path = "button.png";
     auto font_path = "FreeSans.ttf";
     auto bgMusic_path = "bgMusic.ogg";

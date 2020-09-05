@@ -1,5 +1,14 @@
 # Building
 
+## With CMake
+Make sure you have installed `build-essential make git cmake libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-dev`. Then you can do:
+```
+# Build the filelist.h
+bash ./filelist.sh 
+#
+mkdir build && cd build && cmake .. && make
+```
+
 ## Windows binaries
 
 ### Windows with devkitPros version of msys2

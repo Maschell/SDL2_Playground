@@ -48,7 +48,6 @@ bool CheckRunning(){
 
 int main(int argc, char *args[]) {
     auto *system = new SDLSystem();
-
 #if defined _WIN32
     // Create the Console
     AllocConsole();

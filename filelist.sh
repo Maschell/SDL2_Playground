@@ -39,12 +39,10 @@ cat <<EOF > $outFile
  * NOTE:
  * Any manual modification of this file will be overwriten by the generation.
  ****************************************************************************/
-#ifndef _FILELIST_H_
-#define _FILELIST_H_
-
+#pragma once
 
 #include "Resources.h"
-
+#ifndef _CMAKE_BUILD_
 EOF
 
 for i in ${files[@]}
@@ -69,7 +67,30 @@ done
 echo -e '\t{NULL, NULL, 0, NULL, 0}' >> $outFile
 echo '};' >> $outFile
 echo '' >> $outFile
+echo '#else' >> $outFile
+for i in ${files[@]}
+do
+	filename=${i%.*}
+	extension=${i##*.}
+	echo 'extern uint8_t '$filename'_'$extension'[];' >> $outFile
+	echo 'extern uint32_t '$filename'_'$extension'_size;' >> $outFile
+done
 
+echo '' >> $outFile
+
+echo 'static RecourceFile RecourceList[] =' >> $outFile
+echo '{' >> $outFile
+
+for i in ${files[@]}
+do
+	filename=${i%.*}
+	extension=${i##*.}
+	echo -e '\t{"'$i'", (uint8_t*)&'$filename'_'$extension', '$filename'_'$extension'_size, NULL, 0},' >> $outFile
+done
+
+echo -e '\t{NULL, NULL, 0, NULL, 0}' >> $outFile
+echo '};' >> $outFile
+echo '' >> $outFile
 echo '#endif' >> $outFile
 
 fi
