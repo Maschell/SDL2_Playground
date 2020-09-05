@@ -76,7 +76,10 @@ void GuiText::updateTexture(Renderer *renderer) {
             textureData->setBlendMode(SDL_BLENDMODE_BLEND);
             texture.setTexture(textureData);
 
-            FC_DrawColumnToTexture(fc_font, temp, 0, 0, maxWidth, text.c_str());
+            SDL_SetRenderTarget(renderer->getRenderer(), temp);
+            SDL_RenderClear(renderer->getRenderer());
+            FC_DrawColumn(fc_font, renderer->getRenderer(), 0, 0, maxWidth, text.c_str());
+            SDL_SetRenderTarget(renderer->getRenderer(), NULL);
         } else {
             DEBUG_FUNCTION_LINE("Failed to create texture");
         }

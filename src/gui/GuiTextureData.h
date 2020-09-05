@@ -37,4 +37,5 @@ protected:
     SDL_Texture *texture = nullptr;
     int32_t width = 0;
     int32_t height = 0;
+    SDL_BlendMode blendMode;
 };

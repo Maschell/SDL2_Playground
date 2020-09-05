@@ -24,10 +24,7 @@ GuiTextureData::GuiTextureData(SDL_Texture *texture) {
     SDL_QueryTexture(this->texture, nullptr, nullptr, &w, &h);
     this->width = w;
     this->height = h;
-
 }
-
-
 
 void GuiTextureData::loadSurface(SDL_Surface *pSurface) {
     if(!pSurface){
@@ -74,14 +71,28 @@ void GuiTextureData::draw(Renderer *renderer, const SDL_Rect& dest, float angle)
         return;
     }
 
+    // copy the texture to the rendering context
+    SDL_BlendMode mode;
+    SDL_GetRenderDrawBlendMode(renderer->getRenderer(), &mode);
+
+    // adjust blend mode
+    if(blendMode != mode){
+        SDL_SetRenderDrawBlendMode(renderer->getRenderer(), blendMode);
+    }
+
     if (angle == 0) {
         SDL_RenderCopy(renderer->getRenderer(), texture, nullptr, &dest);
     } else {
         SDL_RenderCopyEx(renderer->getRenderer(), texture, nullptr, &dest, angle, nullptr, SDL_FLIP_NONE);
     }
+
+    if(blendMode != mode){
+        SDL_SetRenderDrawBlendMode(renderer->getRenderer(), mode);
+    }
 }
 
-int GuiTextureData::setBlendMode(SDL_BlendMode) {
-    if(texture){ return SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND); }
+int GuiTextureData::setBlendMode(SDL_BlendMode blendMode) {
+    this->blendMode = blendMode;
+    if(texture){ return SDL_SetTextureBlendMode(texture, blendMode); }
     return SDL_BLENDMODE_INVALID;
 }
