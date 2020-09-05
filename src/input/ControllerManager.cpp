@@ -48,7 +48,8 @@ bool ControllerManager::attachJoystick(int32_t deviceId) {
         auto channel = GuiTrigger::CHANNEL_2;
         while (channel != GuiTrigger::CHANNEL_ALL) {
             if (controllerList.find(channel) == controllerList.end()) {
-                if (std::string(SDL_JoystickName(joystick)).find("Xbox") != std::string::npos) {
+                if (std::string(SDL_JoystickName(joystick)).find("Xbox") != std::string::npos
+                 || std::string(SDL_JoystickName(joystick)).find("X-Box") != std::string::npos) {
                     controllerList[channel] = new SDLControllerXboxOne(channel);
                 } else if (std::string(SDL_JoystickName(joystick)).find("WiiU Pro Controller") != std::string::npos) {
                     controllerList[channel] = new SDLControllerWiiUProContoller(channel);
