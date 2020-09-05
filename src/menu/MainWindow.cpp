@@ -81,8 +81,7 @@ MainWindow::MainWindow(int32_t w, int32_t h, Renderer* renderer) : GuiFrame(w, h
         DEBUG_FUNCTION_LINE("Failed to add image");
         return;
     }
-
-    DEBUG_FUNCTION_LINE("%d", image5->getWidth());
+    
     button = new GuiButton(image5->getWidth(), image5->getHeight());
 
     this->setAlignment(ALIGN_TOP_LEFT);
