@@ -25,5 +25,6 @@ private:
     GuiImage *image4 = nullptr;
     GuiImage *image5 = nullptr;
     GuiButton *button = nullptr;
+    GuiImage bgImage;
     GuiSound *bgMusic = nullptr;
 };

@@ -17,11 +17,13 @@ MainWindow::~MainWindow() {
     delete bgMusic;
 }
 
-MainWindow::MainWindow(int32_t w, int32_t h, Renderer* renderer) : GuiFrame(w, h) {
+MainWindow::MainWindow(int32_t w, int32_t h, Renderer* renderer) : GuiFrame(w, h), bgImage({100, 0, 0, 255}, w, h)  {
     auto picture_path = "button.png";
     auto font_path = "FreeSans.ttf";
     auto bgMusic_path = "bgMusic.ogg";
     auto music_click = "button_click.mp3";
+
+    append(&bgImage);
 
     TTF_Font *font;
 
