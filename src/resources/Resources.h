@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <cstdint>
+#include "../system/video/Renderer.h"
 
 //! forward declaration
 class GuiTextureData;
@@ -18,6 +19,8 @@ typedef struct RecourceFile
     unsigned int        CustomFileSize;
 } RecourceFile;
 
+
+
 class Resources {
 public:
     static void Clear();
@@ -28,20 +31,20 @@ public:
 
     static uint32_t GetFileSize(const char *filename);
 
-    static GuiTextureData *GetTexture(const char *filename);
+    static GuiTextureData *GetTexture(Renderer::RendererTarget target, const char *filename);
 
-    static bool RemoveTexture(GuiTextureData *image);
+    static bool RemoveTexture(Renderer::RendererTarget target, GuiTextureData *image);
 
-    static GuiSound *GetSound(const char *filename);
+    static GuiSound *GetSound(Renderer::RendererTarget target, const char *filename);
 
-    static void RemoveSound(GuiSound *sound);
+    static void RemoveSound(Renderer::RendererTarget target, GuiSound *sound);
 
 private:
-    static Resources *instance;
+    Resources() = default;
 
-    Resources() {}
+    ~Resources() = default;
 
-    ~Resources() {}
+    static std::map<Renderer::RendererTarget, Resources * > instances;
 
     std::map<std::string, std::pair<uint32_t, GuiTextureData *> > textureDataMap;
     std::map<std::string, std::pair<uint32_t, GuiSound *> > soundDataMap;

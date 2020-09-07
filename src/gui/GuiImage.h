@@ -23,11 +23,16 @@
 //!Display, manage, and manipulate images in the GUI
 class GuiImage : public GuiElement {
 public:
-    //!\overload
-    //!\param img Pointer to GuiImageData element
+
     GuiImage() = default;
 
+    //! Draws an image from an existing texture
+    //!\param texture Pointer to GuiTextureData element
     explicit GuiImage(GuiTextureData *texture);
+
+    //! Draws a colored rectangle
+    //!\param texture Pointer to GuiTextureData element
+    explicit GuiImage(SDL_Color color, float width, float height);
 
     //!Destructor
     ~GuiImage() override;
@@ -35,7 +40,11 @@ public:
     void draw(Renderer *r) override;
 
     void setTexture(GuiTextureData *tex);
+
 private:
     GuiTextureData *texture = nullptr;
     bool freeTextureData = false;
+
+    // Color of the rect that's drawn if the picture has no texture.
+    SDL_Color color = {0, 0, 0, 0};
 };

@@ -3,10 +3,11 @@
 #include "gui/GuiFrame.h"
 #include "gui/GuiButton.h"
 #include "gui/GuiController.h"
-#include "menu/MainWindow.h"
+#include "menu/MainWindowTV.h"
 #include "input/SDLController.h"
 #include "input/SDLControllerMouse.h"
 #include "input/ControllerManager.h"
+#include "menu/MainWindow.h"
 
 #include <cstdio>
 #include <fcntl.h>
@@ -70,7 +71,9 @@ int main(int argc, char *args[]) {
     WHBLogUdpInit();
 #endif
 
-    auto * frame = new MainWindow(system->getWidth(), system->getHeight(), system->getRenderer());
+    DEBUG_FUNCTION_LINE("%0.1f %0.1f", system->getWidth(), system->getHeight());
+
+    auto * frame = new MainWindow(system);
 
     auto * controllerM = new ControllerManager(system->getWidth(), system->getHeight());
 
@@ -132,16 +135,9 @@ int main(int argc, char *args[]) {
 
         frame->process();
 
-        // clear the screen
-        SDL_RenderClear(system->getRenderer()->getRenderer());
-
-        frame->draw(system->getRenderer());
+        frame->draw();
 
         frame->updateEffects();
-
-        // flip the backbuffer
-        // this means that everything that we prepared behind the screens is actually shown
-        SDL_RenderPresent(system->getRenderer()->getRenderer());
     }
 
     delete frame;

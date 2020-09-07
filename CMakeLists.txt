@@ -29,7 +29,11 @@ add_executable(${PROJECT_NAME}
         src/fs/CFile.hpp
         src/fs/FSUtils.cpp
         src/fs/FSUtils.h
-        src/input/SDLController.h src/menu/MainWindow.cpp src/menu/MainWindow.h src/input/SDLControllerJoystick.h src/input/SDLControllerMouse.h
+        src/menu/MainWindow.cpp
+        src/menu/MainWindow.h
+        src/menu/MainWindowDRC.cpp
+        src/menu/MainWindowDRC.h
+        src/input/SDLController.h src/menu/MainWindowTV.cpp src/menu/MainWindowTV.h src/input/SDLControllerJoystick.h src/input/SDLControllerMouse.h
         src/input/SDLControllerWiiUGamepad.h
         src/input/SDLControllerWiiUProContoller.h
         src/gui/GuiTextureData.cpp src/gui/GuiTextureData.h

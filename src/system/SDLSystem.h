@@ -24,12 +24,15 @@ public:
 
     virtual ~SDLSystem();
 
-    Renderer *getRenderer();
+    Renderer *getRendererTV();
+    Renderer *getRendererDRC();
 
     float getHeight();
     float getWidth();
 
 private:
-    SDL_Window *window = NULL;
-    Renderer *renderer = NULL;
+    SDL_Window *window_tv = nullptr;
+    SDL_Window *window_drc = nullptr;
+    Renderer *renderer_tv = nullptr;
+    Renderer *renderer_drc = nullptr;
 };

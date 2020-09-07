@@ -11,7 +11,8 @@
 #include "filelist.h"
 #include "../utils/logger.h"
 
-Resources *Resources::instance = nullptr;
+
+std::map<Renderer::Renderer::RendererTarget, Resources *> Resources::instances;
 
 void Resources::Clear() {
     for (int32_t i = 0; RecourceList[i].filename != nullptr; ++i) {
@@ -19,15 +20,15 @@ void Resources::Clear() {
             free(RecourceList[i].CustomFile);
             RecourceList[i].CustomFile = nullptr;
         }
-
         if (RecourceList[i].CustomFileSize != 0) {
             RecourceList[i].CustomFileSize = 0;
         }
     }
 
-    delete instance;
-
-    instance = nullptr;
+    for (auto const&[target, instance] : instances) {
+        delete instance;
+    }
+    instances.clear();
 }
 
 bool Resources::LoadFiles(const char *path) {
@@ -78,10 +79,12 @@ uint32_t Resources::GetFileSize(const char *filename) {
     return 0;
 }
 
-GuiTextureData *Resources::GetTexture(const char *filename) {
-    if (!instance) {
-        instance = new Resources;
+GuiTextureData *Resources::GetTexture(Renderer::RendererTarget target, const char *filename) {
+    if (instances.count(target) == 0) {
+        instances[target] = new Resources();
     }
+
+    Resources *instance = instances[target];
 
     auto itr = instance->textureDataMap.find(std::string(filename));
     if (itr != instance->textureDataMap.end()) {
@@ -109,7 +112,13 @@ GuiTextureData *Resources::GetTexture(const char *filename) {
     return nullptr;
 }
 
-bool Resources::RemoveTexture(GuiTextureData *image) {
+bool Resources::RemoveTexture(Renderer::RendererTarget target, GuiTextureData *image) {
+    if (instances.count(target) == 0) {
+        instances[target] = new Resources();
+    }
+
+    Resources *instance = instances[target];
+
     std::map<std::string, std::pair<uint32_t, GuiTextureData *> >::iterator itr;
 
     for (itr = instance->textureDataMap.begin(); itr != instance->textureDataMap.end(); itr++) {
@@ -128,10 +137,12 @@ bool Resources::RemoveTexture(GuiTextureData *image) {
     return false;
 }
 
-GuiSound *Resources::GetSound(const char *filename) {
-    if (!instance) {
-        instance = new Resources;
+GuiSound *Resources::GetSound(Renderer::RendererTarget target, const char *filename) {
+    if (instances.count(target) == 0) {
+        instances[target] = new Resources();
     }
+
+    Resources *instance = instances[target];
 
     auto itr = instance->soundDataMap.find(std::string(filename));
     if (itr != instance->soundDataMap.end()) {
@@ -159,7 +170,13 @@ GuiSound *Resources::GetSound(const char *filename) {
     return nullptr;
 }
 
-void Resources::RemoveSound(GuiSound *sound) {
+void Resources::RemoveSound(Renderer::RendererTarget target, GuiSound *sound) {
+    if (instances.count(target) == 0) {
+        instances[target] = new Resources();
+    }
+
+    Resources *instance = instances[target];
+
     std::map<std::string, std::pair<uint32_t, GuiSound *> >::iterator itr;
 
     for (itr = instance->soundDataMap.begin(); itr != instance->soundDataMap.end(); itr++) {

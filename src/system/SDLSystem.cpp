@@ -18,27 +18,61 @@
 #include "../utils/logger.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+#ifdef __WIIU__
+#include <gx2/display.h>
+#endif
 
 SDLSystem::SDLSystem() {
     SDL_Init(SDL_INIT_EVERYTHING);
 
+    int width = 1280;
+    int height = 720;
+
     auto SDLFlags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC;
 
+#ifdef __WIIU__
+    window_tv = SDL_CreateWindow(nullptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_WIIU_TV_ONLY);
+#else
+    window_tv = SDL_CreateWindow(nullptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
+#endif
+
     //Setup window
-    window = SDL_CreateWindow(nullptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, 0);
-    if (!window) {
+    if (!window_tv) {
         DEBUG_FUNCTION_LINE("Failed to create window");
         return;
     }
-    auto sdl_renderer = SDL_CreateRenderer(window, -1, SDLFlags);
-    if (!sdl_renderer) {
+    auto sdl_renderer_tv = SDL_CreateRenderer(window_tv, -1, SDLFlags);
+    if (!sdl_renderer_tv) {
         DEBUG_FUNCTION_LINE("Failed to init sdl renderer");
         return;
     }
-    SDL_SetRenderTarget(sdl_renderer, nullptr);
-    this->renderer = new Renderer(sdl_renderer, SDL_GetWindowPixelFormat(window));
-    if (!renderer) {
-        DEBUG_FUNCTION_LINE("Failed to init renderer");
+    SDL_SetRenderTarget(sdl_renderer_tv, nullptr);
+    this->renderer_tv = new Renderer(sdl_renderer_tv, SDL_GetWindowPixelFormat(window_tv), Renderer::TARGET_TV);
+    if (!renderer_tv) {
+        DEBUG_FUNCTION_LINE("Failed to init renderer_tv");
+        return;
+    }
+
+#ifdef __WIIU__
+    window_drc = SDL_CreateWindow(nullptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_WIIU_GAMEPAD_ONLY );
+#else
+    window_drc = SDL_CreateWindow(nullptr, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
+#endif
+
+    //Setup window
+    if (!window_drc) {
+        DEBUG_FUNCTION_LINE("Failed to create window");
+        return;
+    }
+    auto sdl_renderer_drc = SDL_CreateRenderer(window_drc, -1, SDLFlags);
+    if (!sdl_renderer_drc) {
+        DEBUG_FUNCTION_LINE("Failed to init sdl renderer");
+        return;
+    }
+    SDL_SetRenderTarget(sdl_renderer_drc, nullptr);
+    this->renderer_drc = new Renderer(sdl_renderer_drc, SDL_GetWindowPixelFormat(window_drc), Renderer::TARGET_DRC);
+    if (!renderer_drc) {
+        DEBUG_FUNCTION_LINE("Failed to init renderer_tv");
         return;
     }
 
@@ -59,23 +93,29 @@ SDLSystem::SDLSystem() {
 }
 
 SDLSystem::~SDLSystem() {
-    SDL_DestroyWindow(window);
-    delete renderer;
+    SDL_DestroyWindow(window_tv);
+    SDL_DestroyWindow(window_drc);
+    delete renderer_tv;
+    delete renderer_drc;
     SDL_Quit();
 }
 
 float SDLSystem::getHeight() {
     int h = 0;
-    SDL_GetWindowSize(window, nullptr, &h);
+    SDL_GetWindowSize(window_tv, nullptr, &h);
     return h;
 }
 
 float SDLSystem::getWidth() {
     int w = 0;
-    SDL_GetWindowSize(window, &w, nullptr);
+    SDL_GetWindowSize(window_tv, &w, nullptr);
     return w;
 }
 
-Renderer *SDLSystem::getRenderer() {
-    return renderer;
+Renderer *SDLSystem::getRendererTV() {
+    return renderer_tv;
+}
+
+Renderer *SDLSystem::getRendererDRC() {
+    return renderer_drc;
 }

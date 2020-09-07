@@ -59,11 +59,6 @@ GuiTextureData::~GuiTextureData() {
 
 void GuiTextureData::draw(Renderer *renderer, const SDL_Rect& dest, float angle) {
     if (texture == nullptr && imgSurface) {
-        SDL_Surface *optimizedSurface = SDL_ConvertSurfaceFormat(imgSurface, renderer->getPixelFormat(), 0);
-        if (optimizedSurface != nullptr) {
-            SDL_FreeSurface(imgSurface);
-            imgSurface = optimizedSurface;
-        }
         texture = SDL_CreateTextureFromSurface(renderer->getRenderer(), imgSurface);
     }
     if (!texture) {
