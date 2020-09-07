@@ -23,7 +23,6 @@ MainWindow::MainWindow(int32_t w, int32_t h, Renderer* renderer) : GuiFrame(w, h
     auto bgMusic_path = "bgMusic.ogg";
     auto music_click = "button_click.mp3";
 
-    TTF_Init();
     TTF_Font *font;
 
     SDL_RWops *rw = SDL_RWFromMem((void *) Resources::GetFile(font_path), Resources::GetFileSize(font_path));
