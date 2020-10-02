@@ -61,7 +61,7 @@ docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-pc-win make -f .\
 ```
 docker build . -f .\Dockerfile.wiiu  -t sdl2_playground-builder-wiiu
 
-docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-wiiu make -f .\Makefile.wiiu -j16
+docker run -it --rm -v ${PWD}:/project sdl2_playground-builder-wiiu make -f Makefile.wiiu -j16
 ```
 
 ### With local installation

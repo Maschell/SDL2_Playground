@@ -32,3 +32,17 @@ jobs:
       with:
        name: linux-x86-64-shared
        path: "./cmake-build/SDL2_Playground"
+  build-wiiu-binary:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: build binary
+      run: |
+        docker build . -f Dockerfile.wiiu  -t sdl2_playground-builder-wiiu
+        docker run --rm -v ${PWD}:/project sdl2_playground-builder-wiiu make -f Makefile.wiiu
+    - uses: actions/upload-artifact@master
+      with:
+       name: wiiu
+       path: "*.rpx"
