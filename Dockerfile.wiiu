@@ -1,3 +1,5 @@
 FROM wiiuenv/devkitppc-with-sdl2:20201002
 
+COPY --from=maschell/libgui-sdl:20201002 /artifacts $DEVKITPRO
+
 WORKDIR project

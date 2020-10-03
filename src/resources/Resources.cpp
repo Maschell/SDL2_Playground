@@ -1,10 +1,9 @@
 #include <malloc.h>
-#include <cstring>
 #include <string>
 #include "Resources.h"
 #include "../fs/FSUtils.h"
-#include "../gui/GuiSound.h"
-#include "../gui/GuiTextureData.h"
+#include <gui/GuiSound.h>
+#include <gui/GuiTextureData.h>
 
 #include <chrono>
 

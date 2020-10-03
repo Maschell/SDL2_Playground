@@ -1,12 +1,12 @@
 #include <SDL2/SDL.h>
-#include "system/SDLSystem.h"
-#include "gui/GuiFrame.h"
-#include "gui/GuiButton.h"
-#include "gui/GuiController.h"
+#include <gui/system/SDLSystem.h>
+#include <gui/GuiFrame.h>
+#include <gui/GuiButton.h>
+#include <gui/GuiController.h>
 #include "menu/MainWindow.h"
-#include "input/SDLController.h"
-#include "input/SDLControllerMouse.h"
-#include "input/ControllerManager.h"
+#include <gui/input/SDLController.h>
+#include <gui/input/SDLControllerMouse.h>
+#include <gui/input/ControllerManager.h>
 
 #include <cstdio>
 #include <fcntl.h>
