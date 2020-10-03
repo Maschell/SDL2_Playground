@@ -33,13 +33,20 @@ ExternalProject_Add(libgui-sdl_git
         PATCH_COMMAND ""
         BUILD_COMMAND ""
         CMAKE_ARGS
+        "-DCMAKE_BUILD_TYPE=Release"
+        "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
         INSTALL_COMMAND
-        "${CMAKE_COMMAND}")
+        "${CMAKE_COMMAND}"
+        --build .
+        --target install
+        --config Release)
 
 add_library (libgui-sdl STATIC IMPORTED GLOBAL)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/vendor/include/gui-sdl/)
 set_target_properties (libgui-sdl PROPERTIES
-        IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/vendor/src/libgui-sdl_git-build/libgui-sdl.a
-        INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR}/vendor/src/libgui-sdl_git/include/gui-sdl)
+        IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/vendor/lib/libgui-sdl.a
+        INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR}/vendor/include/gui-sdl/
+      )
 add_dependencies(libgui-sdl libgui-sdl_git)
 
 ExternalProject_Add(bin2s_git
