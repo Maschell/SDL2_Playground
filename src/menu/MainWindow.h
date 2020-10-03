@@ -16,6 +16,7 @@ public:
     void process() override;
 private:
     GuiText *label = nullptr;
+    GuiText *label2 = nullptr;
     GuiTrigger *touchTrigger = nullptr;
     GuiTrigger *buttonTrigger = nullptr;
     GuiSound *sound = nullptr;

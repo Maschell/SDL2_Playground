@@ -4,6 +4,7 @@
 #include <gui/GuiButton.h>
 #include <gui/GuiController.h>
 #include "menu/MainWindow.h"
+#include "resources/Resources.h"
 #include <gui/input/SDLController.h>
 #include <gui/input/SDLControllerMouse.h>
 #include <gui/input/ControllerManager.h>
@@ -69,6 +70,10 @@ int main(int argc, char *args[]) {
 #elif __WIIU__
     WHBLogUdpInit();
 #endif
+
+    GuiFont font(Resources::GetFile("FreeSans.ttf"),Resources::GetFileSize("FreeSans.ttf"), system->getRenderer());
+
+    GuiText::setPresetFont(&font);
 
     auto * frame = new MainWindow(system->getWidth(), system->getHeight(), system->getRenderer());
 

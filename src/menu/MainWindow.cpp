@@ -3,6 +3,7 @@
 
 MainWindow::~MainWindow() {
     delete label;
+    delete label2;
     delete touchTrigger;
     delete buttonTrigger;
     delete sound;
@@ -19,34 +20,17 @@ MainWindow::~MainWindow() {
 
 MainWindow::MainWindow(int32_t w, int32_t h, Renderer* renderer) : GuiFrame(w, h), bgImage({100, 0, 0, 255}, w, h)  {
     auto picture_path = "button.png";
-    auto font_path = "FreeSans.ttf";
     auto bgMusic_path = "bgMusic.ogg";
     auto music_click = "button_click.mp3";
 
     append(&bgImage);
+    
+    label = new GuiText("This is a test.", 28, {255, 255, 0, 255});
 
-    TTF_Font *font;
-
-    SDL_RWops *rw = SDL_RWFromMem((void *) Resources::GetFile(font_path), Resources::GetFileSize(font_path));
-
-    DEBUG_FUNCTION_LINE("load font %08X %d", Resources::GetFile(font_path), Resources::GetFileSize(font_path));
-
-    font = TTF_OpenFontRW(rw, 0, 28);
-    if(!font){
-        DEBUG_FUNCTION_LINE("Failed to load the font");
-        return;
-    }
-
-    FC_Font* fc_font = FC_CreateFont();
-    if(!fc_font){
-        DEBUG_FUNCTION_LINE("Failed to create font");
-    }
-
-    auto res = FC_LoadFontFromTTF(fc_font, renderer->getRenderer(), font, {255, 255, 255, 255});
-    DEBUG_FUNCTION_LINE("FontCache init %d", res);
-
-    label = new GuiText("This is a test.", {255, 255, 0, 255}, fc_font);
-
+    label2 = new GuiText("This is a bigger text.", 48);
+    label2->setAlignment(ALIGN_CENTERED);
+    label2->setPosition(0,-100);
+    append(label2);
 
     bgMusic = Resources::GetSound(bgMusic_path);
     if(!bgMusic){
